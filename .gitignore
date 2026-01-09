@@ -1,0 +1,16 @@
+# Virtual environment
+venv/
+
+# Ruff linter
+.ruff.toml
+
+# Python files
+practice.py
+
+# Python cache files
+__pycache__/
+*.pyc
+
+# OS files
+.DS_Store
+Thumbs.db
