@@ -29,9 +29,14 @@ HEIGHT = 720  # constant variable for vertical size
 # TODO 2.1: Create an Enemy class that defines what it has and does
 ## inherit Actor class: access methods/prop that handle moving sprites/graphics
 ## initialize parent Actor with enemy.png
-## Define attributes (has): speed, position, image
+## Define attributes (has): speed, position
 ## Define methods (does):
 ### random edge spawn using Actor prop left, right, top, bottom, x, y
+# TODO 2.4: Make enemy spawn face the target
+## Create a update() function inside Enemy class
+### set enemy angle to face target Actor center
+###  Actor.angle = Actor.angle_to(target) method
+## call enemy udpate() in global udpate() to update the enemy spawn angle
 
 
 class Enemy(Actor):  # inherits Actor class to access its methods/prop
@@ -40,9 +45,14 @@ class Enemy(Actor):  # inherits Actor class to access its methods/prop
     Handles enemy spawning, movement toward target, and collision detection
     """
 
-    def __init__(self):  # requires enemy image
-        # Needs images/enemy.png
-        super().__init__("enemy")  # calls parent Actor constructor
+    def __init__(self):
+        """Calls parent Actor constructor w/ input enemy.png
+            Defines the random position of the enemy
+
+        Attributes:
+            self.speed (int): defines speed (px/sec) of the enemy
+        """
+        super().__init__("enemy")  # needs image.png
         self.speed = 10  # 10px/sec
         self.spawn_pos()  # calls the spawn_pos() method
 
@@ -64,6 +74,14 @@ class Enemy(Actor):  # inherits Actor class to access its methods/prop
             self.bottom = 0  # set enemy bottom-hand side @ bottom edge
             self.x = random.randint(0, WIDTH)
 
+    def update(self, target):
+        """Moves and faces the target's center.
+
+        Args:
+            target (obj): The Actor object of our target
+        """
+        self.angle = self.angle_to(target)  # points towards target.center
+
 
 # # Debug 1: Draw the enemy check that it is painted on screen
 
@@ -72,6 +90,23 @@ class Enemy(Actor):  # inherits Actor class to access its methods/prop
 
 # def draw():  # paint on screen
 #     enemy.draw()
+
+# TODO 2.3: Create a class for the target that defines what is has and does
+## inherit Actor class: access methods/prop that handle moving sprites/graphics
+## initialize parent Actor with target.png
+## Define attributes (has): position
+
+
+class Target(Actor):
+    def __init__(self):
+        """Calls parent Actor constructor w/ input enemy.png
+            Defines the random position of the enemy
+
+        Attributes:
+            self.pos (int): defines target x and y position by its center
+        """
+        super().__init__("target")  # Needs image.png
+        self.pos = WIDTH // 2, HEIGHT // 2
 
 
 # TODO 2.2: Spawn multiple enemies at an interval
@@ -101,6 +136,7 @@ class GameState:
 
 
 game = GameState()  # creates instance of GameState class
+target = Target()  # creates instance of Target class (Actor obj)
 
 
 def update(dt):
@@ -118,7 +154,11 @@ def update(dt):
         game.enemies.append(
             Enemy()
         )  # New Enemy obj created and appended to enemies list
+        # for enemy in game.enemies:  # iterate through game.enemies Enemy obj list
+        #     enemy.update(target=target)  # update enemy angle to face target center
         game.spawn_timer = 0  # reset spawn timer after new enemy spawns
+    for enemy in game.enemies:  # iterate through game.enemies Enemy obj list
+        enemy.update(target=target)  # update enemy angle to face target center
         # # Debug 2: test that enemies list is updated by printing
         # print(game.enemies)
 
@@ -132,6 +172,7 @@ def draw():
         game.enemies
     ):  # iterate for every item in game.enemies list, temp store in enemy var
         enemy.draw()  # draw Enemy obj each iteration
+    target.draw()  # draw Target obj
 
 
 pgzrun.go()  # starts pygame zero game loop. can use Python interpreter to run
