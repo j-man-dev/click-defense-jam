@@ -67,7 +67,7 @@ class Enemy(Actor):  # inherits Actor class to access its methods/prop
 
         # Right-center anchor point (enemy's head)
         super().__init__("enemy", anchor=("right", "center"))  # needs image.png
-        self.speed = 50  # px/sec
+        self.speed = 80  # px/sec
         self.spawn_pos()  # calls the spawn_pos() method
 
     def spawn_pos(self):
@@ -152,7 +152,7 @@ class GameState:
         """Holds all the game start data variables together.
 
         Attributes:
-            self.enemies (list): Empty list to store Enemy Actor objects. 0 enemies at start
+            self.enemies (list): Store list of Enemy Actor objects. 0 enemies at start
             self.spawn_timer (int): timer counting in secs since last spawn. Starts at 0.
             self.spawn_interval (int): Define how often enemy spawn.
             self.score (int): tracks player's score. Start at 0
@@ -187,8 +187,33 @@ def update(dt):
         game.spawn_timer = 0  # reset spawn timer after new enemy spawns
     for enemy in game.enemies:  # iterate through game.enemies Enemy obj list
         enemy.update(target, dt)  # update enemy angle to face target center
-        # # Debug 2: test that enemies list is updated by printing
+        # # Debug: test that enemies list is updated by printing
         # print(game.enemies)
+
+
+# TODO 4: Player interaction
+# TODO 4.1: Create function that removes enemy when clicked
+## use automatically called on_mouse_down(pos, button) func.
+## check if input button is left mouse click and input pos collides with enemy
+### Actor_obj.collidepoint(pos)
+## remove enemy from enemies list -> list.remove(element)
+# TODO 5: Increase score by every time an enemy is removed
+## update game.score attribute value with score accumulation
+
+
+def on_mouse_down(pos, button):
+    """Remove enemies at mouse pos
+
+    Args:
+        pos (tuple): (x, y) tuple that gives location of mouse pointer when button pressed.
+        button (obj): A mouse enum value indicating the button that was pressed.
+    """
+    for enemy in game.enemies:
+        if button == mouse.LEFT and enemy.collidepoint(pos):
+            game.enemies.remove(enemy)
+            game.score += 1
+            # # DEBUG: test that the score accumulate when enemy is removed
+            # print(game.score)
 
 
 def draw():
