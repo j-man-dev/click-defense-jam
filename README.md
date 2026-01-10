@@ -8,6 +8,17 @@ Click Defense is a beginner-friendly mouse-based game where you defend a central
 - Score tracking for player feedback
 - Structured for easy expansion and learning
 
+## Project Status
+
+Status: In active development (Game Jam WIP).
+
+Current:
+- Multiple enemies spawn facing the target.
+
+Planned next:
+- Enemy collision.
+- Player interaction.
+
 ## Screenshots
 
 ## Installation
@@ -15,6 +26,9 @@ Click Defense is a beginner-friendly mouse-based game where you defend a central
 ## How to Run
 
 ## Controls
+
+- **Mouse Left Click**: Click on enemies to destroy them
+- **Buttons**: Start game, restart game, quit game
 
 ## Project Structure
 
