@@ -71,7 +71,7 @@ class Enemy(Actor):  # inherits Actor class to access its methods/prop
             self.top = 0  # set enemy top-side @ top edge
             self.x = random.randint(0, WIDTH)  # x pos rand int b/w 0 & WIDTH
         else:
-            self.bottom = 0  # set enemy bottom-hand side @ bottom edge
+            self.bottom = HEIGHT  # set enemy bottom-hand side @ bottom edge
             self.x = random.randint(0, WIDTH)
 
     def update(self, target):
