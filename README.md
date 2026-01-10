@@ -16,8 +16,9 @@ Current:
 - Multiple enemies spawn facing the target.
 
 Planned next:
-- Enemy collision.
 - Player interaction.
+- Score tracking
+- Score display
 
 ## Screenshots
 

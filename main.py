@@ -15,8 +15,9 @@ if TYPE_CHECKING:
     sounds: Any
     music: Any
     clock: Any
+    anchor: Any
 
-    # Below are classes. Pretend the class exists
+    # Below are classes/methods. Pretend the class exists
     class Actor:
         pass
 
@@ -45,6 +46,9 @@ HEIGHT = 720  # constant variable for vertical size
 ### unit vector direction =  distance vector / distance magnitude
 ### scalar speed = number (unit: px/sec)
 ### dt = time since last frame (0.016 @ 60fps). Given automatically by Pygame Zero
+# TODO 3.2: Make enemy start off-screen
+## Make enemy anchor point right-center (enemy's head)
+## adjust x, y pos in def spawn_pos() to set enemy off-screen
 
 
 class Enemy(Actor):  # inherits Actor class to access its methods/prop
@@ -60,26 +64,28 @@ class Enemy(Actor):  # inherits Actor class to access its methods/prop
         Attributes:
             self.speed (int): defines speed (px/sec) of the enemy
         """
-        super().__init__("enemy")  # needs image.png
-        self.speed = 20  # 10px/sec
+
+        # Right-center anchor point (enemy's head)
+        super().__init__("enemy", anchor=("right", "center"))  # needs image.png
+        self.speed = 50  # px/sec
         self.spawn_pos()  # calls the spawn_pos() method
 
     def spawn_pos(self):
-        """Spawn from left/right/top/bottom screen edge.
-        Visible for now but need to be off-screen later."""
+        """Spawn from left/right/top/bottom side off-screen."""
         side = random.choice(["left", "right", "top", "bottom"])
+        sprite_buffer = max(self.width, self.height)  # Actor size
 
         if side == "left":
-            self.left = 0  # set enemy left-hand side pos @ left edge
+            self.x = -sprite_buffer  # set enemy head pos left off-screen
             self.y = random.randint(0, HEIGHT)  # y pos rand int b/w 0 & HEIGHT
         elif side == "right":
-            self.right = WIDTH  # set enemy right-hand side @ right edge
+            self.x = WIDTH + sprite_buffer  # set enemy head right off-screen
             self.y = random.randint(0, HEIGHT)
         elif side == "top":
-            self.top = 0  # set enemy top-side @ top edge
+            self.y = -sprite_buffer  # set enemy head top off-screen
             self.x = random.randint(0, WIDTH)  # x pos rand int b/w 0 & WIDTH
         else:
-            self.bottom = HEIGHT  # set enemy bottom-hand side @ bottom edge
+            self.y = HEIGHT + sprite_buffer  # set enemy head bottom off-screen
             self.x = random.randint(0, WIDTH)
 
     def update(self, target, dt):
