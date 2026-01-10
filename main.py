@@ -1,5 +1,6 @@
 # TODO 0: import pgzrun and add pgzrun.go() at end of code
 
+import math
 import random  # random module to access pseudo-random numbers
 import pgzrun
 from typing import TYPE_CHECKING, Any
@@ -37,6 +38,13 @@ HEIGHT = 720  # constant variable for vertical size
 ### set enemy angle to face target Actor center
 ###  Actor.angle = Actor.angle_to(target) method
 ## call enemy udpate() in global udpate() to update the enemy spawn angle
+# TODO 3: Enemy Movement
+# TODO 3.1: Make enemy move towards the target
+## Update Enemy class update() method with input dt (delta time)
+## Calculate velocity vector = unit direction vector * scalar speed * dt
+### unit vector direction =  distance vector / distance magnitude
+### scalar speed = number (unit: px/sec)
+### dt = time since last frame (0.016 @ 60fps). Given automatically by Pygame Zero
 
 
 class Enemy(Actor):  # inherits Actor class to access its methods/prop
@@ -53,7 +61,7 @@ class Enemy(Actor):  # inherits Actor class to access its methods/prop
             self.speed (int): defines speed (px/sec) of the enemy
         """
         super().__init__("enemy")  # needs image.png
-        self.speed = 10  # 10px/sec
+        self.speed = 20  # 10px/sec
         self.spawn_pos()  # calls the spawn_pos() method
 
     def spawn_pos(self):
@@ -74,13 +82,27 @@ class Enemy(Actor):  # inherits Actor class to access its methods/prop
             self.bottom = HEIGHT  # set enemy bottom-hand side @ bottom edge
             self.x = random.randint(0, WIDTH)
 
-    def update(self, target):
-        """Moves and faces the target's center.
+    def update(self, target, dt):
+        """Moves and rotates its right side to the target's center.
 
         Args:
             target (obj): The Actor object of our target
         """
-        self.angle = self.angle_to(target)  # points towards target.center
+
+        # Rotate RIGHT side to face target
+        self.angle = self.angle_to(target)
+
+        # Move toward target center
+        # NOTE: velocity vector = unit direction vector * speed * dt
+        ## distance vector
+        dx = target.x - self.x
+        dy = target.y - self.y
+        ## distance magnitude
+        dist = math.sqrt(dx**2 + dy**2)
+        ## Velocity vector (direction and speed)
+        if dist > 5:  # prevents division by 0 error
+            self.x += dx / dist * self.speed * dt
+            self.y += dy / dist * self.speed * dt
 
 
 # # Debug 1: Draw the enemy check that it is painted on screen
@@ -158,7 +180,7 @@ def update(dt):
         #     enemy.update(target=target)  # update enemy angle to face target center
         game.spawn_timer = 0  # reset spawn timer after new enemy spawns
     for enemy in game.enemies:  # iterate through game.enemies Enemy obj list
-        enemy.update(target=target)  # update enemy angle to face target center
+        enemy.update(target, dt)  # update enemy angle to face target center
         # # Debug 2: test that enemies list is updated by printing
         # print(game.enemies)
 
