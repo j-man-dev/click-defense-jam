@@ -202,13 +202,13 @@ def update(dt):
 
 
 def on_mouse_down(pos, button):
-    """Remove enemies at mouse pos
+    """Kill ALL enemies under cursor, score per enemy.
 
     Args:
         pos (tuple): (x, y) tuple that gives location of mouse pointer when button pressed.
         button (obj): A mouse enum value indicating the button that was pressed.
     """
-    for enemy in game.enemies:
+    for enemy in game.enemies[:]:
         if button == mouse.LEFT and enemy.collidepoint(pos):
             game.enemies.remove(enemy)
             game.score += 1
