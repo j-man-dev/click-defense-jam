@@ -3,6 +3,7 @@
 import math
 import random  # random module to access pseudo-random numbers
 import pgzrun
+from pygame import mask
 from typing import TYPE_CHECKING, Any
 
 # To avoid Pylance 'not defined' warnings for Pygame Zero objects
@@ -65,8 +66,7 @@ class Enemy(Actor):  # inherits Actor class to access its methods/prop
             self.speed (int): defines speed (px/sec) of the enemy
         """
 
-        # Right-center anchor point (enemy's head)
-        super().__init__("enemy", anchor=("right", "center"))  # needs image.png
+        super().__init__("enemy")  # needs image.png
         self.speed = 80  # px/sec
         self.spawn_pos()  # calls the spawn_pos() method
 
@@ -98,17 +98,17 @@ class Enemy(Actor):  # inherits Actor class to access its methods/prop
         # Rotate RIGHT side to face target
         self.angle = self.angle_to(target)
 
-        # Move toward target center
-        # NOTE: velocity vector = unit direction vector * speed * dt
-        ## distance vector
-        dx = target.x - self.x
-        dy = target.y - self.y
-        ## distance magnitude
-        dist = math.sqrt(dx**2 + dy**2)
-        ## Velocity vector (direction and speed)
-        if dist > 5:  # prevents division by 0 error
-            self.x += dx / dist * self.speed * dt
-            self.y += dy / dist * self.speed * dt
+        # # Move toward target center
+        # # NOTE: velocity vector = unit direction vector * speed * dt
+        # ## distance vector
+        # dx = target.x - self.x
+        # dy = target.y - self.y
+        # ## distance magnitude
+        # dist = math.sqrt(dx**2 + dy**2)
+        # ## Velocity vector (direction and speed)
+        # if dist > 5:  # prevents division by 0 error
+        #     self.x += dx / dist * self.speed * dt
+        #     self.y += dy / dist * self.speed * dt
 
 
 # # Debug 1: Draw the enemy check that it is painted on screen
@@ -145,26 +145,46 @@ class Target(Actor):
 ### if 2 seconds passed since last spawn, add new Enemy obj to the Gamestate enemies list
 ## Create a draw() func to paint on screen
 ### draw the enemy spawn
+# TODO 6: Loss condition
+# TODO 6.1: End game when enemy reaches the target
+## in GameState class, add game_over boolean flag to signal ON/OFF game state
+## in global update() loop game logic: check if collision b/w enemy & target is True
+### Use pixel-perfect collision detection: mask.overlap()
+### stop/pause the game if True
 
 
 class GameState:
     def __init__(self):
-        """Holds all the game start data variables together.
+        """Holds all the game state data variables together (menu, play, end).
 
         Attributes:
             self.enemies (list): Store list of Enemy Actor objects. 0 enemies at start
             self.spawn_timer (int): timer counting in secs since last spawn. Starts at 0.
             self.spawn_interval (int): Define how often enemy spawn.
             self.score (int): tracks player's score. Start at 0
+            self.game_over (bool): Boolean flag set to False to signal game is not over
         """
+        # Current screen/mode (menu, playing, game_over)
+
+        # Gameplay data
         self.enemies = []
         self.spawn_timer = 0
         self.spawn_interval = 2
         self.score = 0
 
+        # Menu data
 
+        # Game over data
+        self.game_over = False
+
+
+# Create instance obj
 game = GameState()  # creates instance of GameState class
 target = Target()  # creates instance of Target class (Actor obj)
+
+# Mask object (map of opaque/transparent pixels) for loaded image.png
+ENEMY_MASK = mask.from_surface(images.enemy)
+TARGET_MASK = mask.from_surface(images.target)
 
 
 def update(dt):
@@ -174,6 +194,9 @@ def update(dt):
     Args:
         dt (float): delta time is time since last frame. Given automatically by Pygame Zero
     """
+
+    if game.game_over:  # is game_over True?
+        return  # Exit out of def update() game loop/freezes screen
 
     # Enemy spawn rate
     game.spawn_timer += dt  # spawn timer increases every frame by dt value
@@ -190,6 +213,13 @@ def update(dt):
         # # Debug: test that enemies list is updated by printing
         # print(game.enemies)
 
+        # # PIXEL-PERFECT COLLISIOIN DETECTION
+        # dx = int(target.x - enemy.x)  # dx shift
+        # dy = int(target.y - enemy.y)  # dy shift
+        # collision_point = ENEMY_MASK.overlap(TARGET_MASK, (dx, dy))
+        # if collision_point:  # opaque pixels touch?
+        #     game.game_over = True  # opaque pixels touched -> pause game
+
 
 # TODO 4: Player interaction
 # TODO 4.1: Create function that removes enemy when clicked
@@ -202,13 +232,13 @@ def update(dt):
 
 
 def on_mouse_down(pos, button):
-    """Kill ALL enemies under cursor, score per enemy.
+    """Remove enemies at mouse pos
 
     Args:
         pos (tuple): (x, y) tuple that gives location of mouse pointer when button pressed.
         button (obj): A mouse enum value indicating the button that was pressed.
     """
-    for enemy in game.enemies[:]:
+    for enemy in game.enemies:
         if button == mouse.LEFT and enemy.collidepoint(pos):
             game.enemies.remove(enemy)
             game.score += 1
