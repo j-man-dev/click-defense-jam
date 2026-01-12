@@ -78,22 +78,33 @@ class Enemy(Actor):  # inherits Actor class to access its methods/prop
 
     def spawn_pos(self):
         """Spawn from edges and corners off-screen."""
-        side = random.choice(["left", "right", "top", "bottom"])
         sprite_diag = math.hypot(self.width, self.height)  # diagonal length
-        sprite_buffer = int(sprite_diag * 0.5) + 50  # half diag + padding
+        buffer = int(sprite_diag * 0.5) + 50  # half diag + padding
 
-        if side == "left":
-            self.x = -sprite_buffer  # set enemy head pos left off-screen
-            self.y = random.randint(0, HEIGHT)  # y pos rand int b/w 0 & HEIGHT
-        elif side == "right":
-            self.x = WIDTH + sprite_buffer  # set enemy head right off-screen
-            self.y = random.randint(0, HEIGHT)
-        elif side == "top":
-            self.y = -sprite_buffer  # set enemy head top off-screen
-            self.x = random.randint(0, WIDTH)  # x pos rand int b/w 0 & WIDTH
-        else:
-            self.y = HEIGHT + sprite_buffer  # set enemy head bottom off-screen
-            self.x = random.randint(0, WIDTH)
+        positions = {
+            "left": (-buffer, "y"),
+            "right": (WIDTH + buffer, "y"),
+            "top": ("x", -buffer),
+            "bottom": ("x", HEIGHT + buffer),
+            "top-left": (-buffer, -buffer),
+            "top-right": (WIDTH + buffer, -buffer),
+            "bottom-left": (-buffer, HEIGHT + buffer),
+            "bottom-right": (WIDTH + buffer, HEIGHT + buffer),
+        }
+
+        # Creates list of positions keys and choooses a random one
+        side = random.choice(list(positions.keys()))
+
+        pos_x, pos_y = positions[side]  # calls key value (x, y)
+
+        if pos_x == "x":  # top or bottom edge
+            self.x = random.randint(buffer, WIDTH - buffer)
+            self.y = pos_y
+        elif pos_y == "y":  # left or right edge
+            self.y = random.randint(buffer, HEIGHT - buffer)
+            self.x = pos_x
+        else:  # corners
+            self.x, self.y = pos_x, pos_y
 
     def update(self, target, dt):
         """Moves and rotates its right side to the target's center.
