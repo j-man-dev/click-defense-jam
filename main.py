@@ -1,12 +1,10 @@
-# TODO 0: import pgzrun and add pgzrun.go() at end of code
-
 import math
 import random  # random module to access pseudo-random numbers
 import pgzrun
 from pygame import mask, transform
 from typing import TYPE_CHECKING, Any
 
-# To avoid Pylance 'not defined' warnings for Pygame Zero objects
+# Avoid Pylance 'not defined' warnings for Pygame Zero objects
 if TYPE_CHECKING:
     # If type checking is being performed, the following variables are assumed to exist and may be of any type.
     screen: Any
@@ -18,37 +16,14 @@ if TYPE_CHECKING:
     clock: Any
     anchor: Any
 
-    # Below are classes/methods. Pretend the class exists
+    # Below are classes/methods.
     class Actor:
         pass
 
 
-# TODO 1: Create a window screen
-## Screen resolution 1280x720
+# Screen resolution 1280x720
 WIDTH = 1280  # constant variable for horizontal size
 HEIGHT = 720  # constant variable for vertical size
-
-# TODO 2: Enemy spawn
-# TODO 2.1: Create an Enemy class that defines what it has and does
-## inherit Actor class: access methods/prop that handle moving sprites/graphics
-## initialize parent Actor with enemy.png
-## Define attributes (has): speed, position
-## Define methods (does):
-### random edge spawn using Actor prop left, right, top, bottom, x, y
-# TODO 2.4: Make enemy spawn face the target
-## Create a update() function inside Enemy class
-### set enemy angle to face target Actor center
-###  Actor.angle = Actor.angle_to(target) method
-## call enemy udpate() in global udpate() to update the enemy spawn angle
-# TODO 3: Enemy Movement
-# TODO 3.1: Make enemy move towards the target
-## Update Enemy class update() method with input dt (delta time)
-## Calculate velocity vector = unit direction vector * scalar speed * dt
-### unit vector direction =  distance vector / distance magnitude
-### scalar speed = number (unit: px/sec)
-### dt = time since last frame (0.016 @ 60fps). Given automatically by Pygame Zero
-# TODO 3.2: Make enemy start off-screen
-## adjust x, y pos in def spawn_pos() to set enemy off-screen
 
 
 class Enemy(Actor):  # inherits Actor class to access its methods/prop
@@ -92,7 +67,7 @@ class Enemy(Actor):  # inherits Actor class to access its methods/prop
             "bottom-right": (WIDTH + buffer, HEIGHT + buffer),
         }
 
-        # Creates list of positions keys and chooses a random one
+        # Choose random key value from positions dict
         side = random.choice(list(positions.keys()))
 
         pos_x, pos_y = positions[side]  # calls key value (x, y)
@@ -141,12 +116,6 @@ class Enemy(Actor):  # inherits Actor class to access its methods/prop
             self.y += dy / dist * self.speed * dt
 
 
-# TODO 2.3: Create a class for the target that defines what is has and does
-## inherit Actor class: access methods/prop that handle moving sprites/graphics
-## initialize parent Actor with target.png
-## Define attributes (has): position
-
-
 class Target(Actor):
     def __init__(self):
         """Calls parent Actor constructor w/ input enemy.png
@@ -161,22 +130,6 @@ class Target(Actor):
         self.pos = WIDTH // 2, HEIGHT // 2
         self.mask = mask.from_surface(images.target)
         self.mask_rect = self.mask.get_rect(center=(self.x, self.y))
-
-
-# TODO 2.2: Spawn multiple enemies at an interval
-## Create a game state class that holds all the game data variables together:
-### zero enemies, score, and spawn timer. spawn interval 2 sec
-## Use the udpate() function to create new enemy based on spawn interval
-### def update(dt) -> dt = time since last frame given automatically by Pygame Zero
-### if 2 seconds passed since last spawn, add new Enemy obj to the Gamestate enemies list
-## Create a draw() func to draw enemy spawn
-
-# TODO 6: Loss condition
-# TODO 6.1: End game when enemy reaches the target
-## in GameState class, add game_over boolean flag to signal ON/OFF game state
-## in global update() loop game logic: check if collision b/w enemy & target is True
-### Use pixel-perfect collision detection: mask.overlap()
-### stop/pause the game if True
 
 
 class GameState:
@@ -210,8 +163,8 @@ target = Target()  # creates instance of Target class (Actor obj)
 
 
 def update(dt):
-    """update() is called automatically by Pygame Zero 60x/sec.
-    It handles spawn rate, movement, collisions, scoring.
+    """update() loop called automatically by Pygame Zero 60x/sec.
+    It handles game logic: spawn rate, movement, collisions, scoring.
 
     Args:
         dt (float): delta time is time since last frame. Given automatically by Pygame Zero
@@ -242,18 +195,8 @@ def update(dt):
             print("GAME OVER!")
 
 
-# TODO 4: Player interaction
-# TODO 4.1: Create function that removes enemy when clicked
-## use automatically called on_mouse_down(pos, button) func.
-## check if input button is left mouse click and input pos collides with enemy
-### Actor_obj.collidepoint(pos)
-## remove enemy from enemies list -> list.remove(element)
-# TODO 5: Increase score by every time an enemy is removed
-## update game.score attribute value with score accumulation
-
-
 def on_mouse_down(pos, button):
-    """Remove enemies at mouse pos
+    """Remove enemies at mouse click pos
 
     Args:
         pos (tuple): (x, y) tuple that gives location of mouse pointer when button pressed.
@@ -281,4 +224,5 @@ def draw():
     target.draw()  # draw Target obj
 
 
-pgzrun.go()  # starts pygame zero game loop. can use Python interpreter to run
+# start pygame zero game loop using Python interpreter to run
+pgzrun.go()
