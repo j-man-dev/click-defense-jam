@@ -129,15 +129,6 @@ class Enemy(Actor):  # inherits Actor class to access its methods/prop
             self.y += dy / dist * self.speed * dt
 
 
-# # Debug start: Draw the enemy check that it is painted on screen
-
-# enemy = Enemy()  # create Enemy obj -> Actor
-
-
-# def draw():  # paint on screen
-#     enemy.draw()
-# Debug end: Draw the enemy check that it is painted on screen
-
 # TODO 2.3: Create a class for the target that defines what is has and does
 ## inherit Actor class: access methods/prop that handle moving sprites/graphics
 ## initialize parent Actor with target.png
@@ -229,9 +220,6 @@ def update(dt):
         game.spawn_timer = 0  # reset spawn timer after new enemy spawns
     for enemy in game.enemies:  # iterate through game.enemies Enemy obj list
         enemy.update(target, dt)  # update enemy angle to face target center
-        # # Debug start: test that enemies list is updated by printing
-        # print(game.enemies)
-        # # Debug end: test that enemies list is updated by printing
 
         # PIXEL-PERFECT COLLISIOIN DETECTION
         dx = int(enemy.mask_rect.left - target.mask_rect.left)  # left offset pos
@@ -277,11 +265,6 @@ def draw():
         game.enemies
     ):  # iterate for every item in game.enemies list, temp store in enemy var
         enemy.draw()  # draw Enemy obj each iteration
-
-        # # DEBUG start: check that size are the same between the actor and mask
-        # print(f"Actor w/h {enemy.width}, {enemy.height}")
-        # print(f"Mask w/h {enemy.mask.get_size()}")
-        # # DEBUG end: check that size are the same between the actor and mask
 
     target.draw()  # draw Target obj
 
