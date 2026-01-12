@@ -3,7 +3,7 @@
 import math
 import random  # random module to access pseudo-random numbers
 import pgzrun
-from pygame import mask
+from pygame import mask, transform
 from typing import TYPE_CHECKING, Any
 
 # To avoid Pylance 'not defined' warnings for Pygame Zero objects
@@ -48,14 +48,13 @@ HEIGHT = 720  # constant variable for vertical size
 ### scalar speed = number (unit: px/sec)
 ### dt = time since last frame (0.016 @ 60fps). Given automatically by Pygame Zero
 # TODO 3.2: Make enemy start off-screen
-## Make enemy anchor point right-center (enemy's head)
 ## adjust x, y pos in def spawn_pos() to set enemy off-screen
 
 
 class Enemy(Actor):  # inherits Actor class to access its methods/prop
     """Docstring for Enemy
-    Moving enemy that spawns from edges and chases the target.
-    Handles enemy spawning, movement toward target, and collision detection
+    Moves and rotates enemy to face target.
+    Handles enemy spawning, movement toward target.
     """
 
     def __init__(self):
@@ -64,11 +63,18 @@ class Enemy(Actor):  # inherits Actor class to access its methods/prop
 
         Attributes:
             self.speed (int): defines speed (px/sec) of the enemy
+            self.orig_surf (obj): original Surface of loaded enemy.png
+            self.spawn_pos() (tuple): (int, int) x, y spawn position coordinates
+            self.mask (obj): current mask obj of rotated Surface. Updates dynamically
+            self.anchor (str): defines reference point for position
         """
 
         super().__init__("enemy")  # needs image.png
         self.speed = 80  # px/sec
         self.spawn_pos()  # calls the spawn_pos() method
+        self.orig_surf = images.enemy
+        self.mask = None
+        self.anchor = "center", "center"  # explicit (default)
 
     def spawn_pos(self):
         """Spawn from left/right/top/bottom side off-screen."""
@@ -90,34 +96,52 @@ class Enemy(Actor):  # inherits Actor class to access its methods/prop
 
     def update(self, target, dt):
         """Moves and rotates its right side to the target's center.
+        Stores rotated offset for mask alignment to Actor's draw.
 
         Args:
             target (obj): The Actor object of our target
+
+        Attributes:
+            self.angle (float): updates the Actor visual angle. rotates counter-clockwise
+            self.mask_offset_x (float): rotated x offset position for mask alignment
+            self.mask_offset_y (float): roated y offset positoin for mask alignment
         """
 
-        # Rotate RIGHT side to face target
-        self.angle = self.angle_to(target)
+        # Rotate angle to face target
+        self.angle = self.angle_to(target)  # ANTICLOCKWISE rotation
 
-        # # Move toward target center
-        # # NOTE: velocity vector = unit direction vector * speed * dt
-        # ## distance vector
-        # dx = target.x - self.x
-        # dy = target.y - self.y
-        # ## distance magnitude
-        # dist = math.sqrt(dx**2 + dy**2)
-        # ## Velocity vector (direction and speed)
-        # if dist > 5:  # prevents division by 0 error
-        #     self.x += dx / dist * self.speed * dt
-        #     self.y += dy / dist * self.speed * dt
+        # Create rotated surface & mask matching Actor's draw (CW to counter Actor's CCW)
+        rotated_surf = transform.rotate(self.orig_surf, -self.angle)
+        self.mask = mask.from_surface(rotated_surf)  # mask of rotated surface
+
+        # store rotation offset = to rotated surf's top/left relative to enemy pos
+        rotated_rect = rotated_surf.get_rect(
+            center=(self.x, self.y)
+        )  # set rect center to match enemy.pos
+        self.mask_offset_x = self.x - rotated_rect.left
+        self.mask_offset_y = self.y - rotated_rect.top
+
+        # Move toward target center
+        # NOTE: velocity vector = unit direction vector * speed * dt
+        ## distance vector
+        dx = target.x - self.x
+        dy = target.y - self.y
+        ## distance magnitude
+        dist = math.sqrt(dx**2 + dy**2)
+        ## Velocity vector (direction and speed)
+        if dist > 5:  # prevents division by 0 error
+            self.x += dx / dist * self.speed * dt
+            self.y += dy / dist * self.speed * dt
 
 
-# # Debug 1: Draw the enemy check that it is painted on screen
+# # Debug start: Draw the enemy check that it is painted on screen
 
 # enemy = Enemy()  # create Enemy obj -> Actor
 
 
 # def draw():  # paint on screen
 #     enemy.draw()
+# Debug end: Draw the enemy check that it is painted on screen
 
 # TODO 2.3: Create a class for the target that defines what is has and does
 ## inherit Actor class: access methods/prop that handle moving sprites/graphics
@@ -132,9 +156,11 @@ class Target(Actor):
 
         Attributes:
             self.pos (int): defines target x and y position by its center
+            self.mask (obj): mask object of the loaded target.png
         """
         super().__init__("target")  # Needs image.png
         self.pos = WIDTH // 2, HEIGHT // 2
+        self.mask = mask.from_surface(images.target)
 
 
 # TODO 2.2: Spawn multiple enemies at an interval
@@ -182,10 +208,6 @@ class GameState:
 game = GameState()  # creates instance of GameState class
 target = Target()  # creates instance of Target class (Actor obj)
 
-# Mask object (map of opaque/transparent pixels) for loaded image.png
-ENEMY_MASK = mask.from_surface(images.enemy)
-TARGET_MASK = mask.from_surface(images.target)
-
 
 def update(dt):
     """update() is called automatically by Pygame Zero 60x/sec.
@@ -210,15 +232,16 @@ def update(dt):
         game.spawn_timer = 0  # reset spawn timer after new enemy spawns
     for enemy in game.enemies:  # iterate through game.enemies Enemy obj list
         enemy.update(target, dt)  # update enemy angle to face target center
-        # # Debug: test that enemies list is updated by printing
+        # # Debug start: test that enemies list is updated by printing
         # print(game.enemies)
+        # # Debug end: test that enemies list is updated by printing
 
-        # # PIXEL-PERFECT COLLISIOIN DETECTION
-        # dx = int(target.x - enemy.x)  # dx shift
-        # dy = int(target.y - enemy.y)  # dy shift
-        # collision_point = ENEMY_MASK.overlap(TARGET_MASK, (dx, dy))
-        # if collision_point:  # opaque pixels touch?
-        #     game.game_over = True  # opaque pixels touched -> pause game
+        # PIXEL-PERFECT COLLISIOIN DETECTION
+        dx = int(target.x - (enemy.x - enemy.mask_offset_x))  # x offset
+        dy = int(target.y - (enemy.y - enemy.mask_offset_y))  # y offset
+        collision_point = target.mask.overlap(enemy.mask, (dx, dy))
+        if collision_point:  # opaque pixels touch?
+            game.game_over = True  # opaque pixels touched -> pause game
 
 
 # TODO 4: Player interaction
@@ -242,8 +265,9 @@ def on_mouse_down(pos, button):
         if button == mouse.LEFT and enemy.collidepoint(pos):
             game.enemies.remove(enemy)
             game.score += 1
-            # # DEBUG: test that the score accumulate when enemy is removed
+            # # DEBUG start: test that the score accumulate when enemy is removed
             # print(game.score)
+            # # DEBUG end: test that the score accumulate when enemy is removed
 
 
 def draw():
@@ -255,6 +279,12 @@ def draw():
         game.enemies
     ):  # iterate for every item in game.enemies list, temp store in enemy var
         enemy.draw()  # draw Enemy obj each iteration
+
+        # DEBUG start: check that size are the same between the actor and mask
+        print(f"Actor w/h {enemy.width}, {enemy.height}")
+        print(f"Mask w/h {enemy.mask.get_size()}")
+        # DEBUG end: check that size are the same between the actor and mask
+
     target.draw()  # draw Target obj
 
 
