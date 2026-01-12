@@ -92,7 +92,7 @@ class Enemy(Actor):  # inherits Actor class to access its methods/prop
             "bottom-right": (WIDTH + buffer, HEIGHT + buffer),
         }
 
-        # Creates list of positions keys and choooses a random one
+        # Creates list of positions keys and chooses a random one
         side = random.choice(list(positions.keys()))
 
         pos_x, pos_y = positions[side]  # calls key value (x, y)
