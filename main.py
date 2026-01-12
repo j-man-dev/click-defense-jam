@@ -77,9 +77,10 @@ class Enemy(Actor):  # inherits Actor class to access its methods/prop
         self.anchor = "center", "center"  # explicit (default)
 
     def spawn_pos(self):
-        """Spawn from left/right/top/bottom side off-screen."""
+        """Spawn from edges and corners off-screen."""
         side = random.choice(["left", "right", "top", "bottom"])
-        sprite_buffer = max(self.width, self.height)  # Actor size
+        sprite_diag = math.hypot(self.width, self.height)  # diagonal length
+        sprite_buffer = int(sprite_diag * 0.5) + 50  # half diag + padding
 
         if side == "left":
             self.x = -sprite_buffer  # set enemy head pos left off-screen
