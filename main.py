@@ -103,8 +103,7 @@ class Enemy(Actor):  # inherits Actor class to access its methods/prop
 
         Attributes:
             self.angle (float): updates the Actor visual angle. rotates counter-clockwise
-            self.mask_offset_x (float): rotated x offset position for mask alignment
-            self.mask_offset_y (float): roated y offset positoin for mask alignment
+            self.mask_rect (obj): Rect obj of the mask obj after rotation and center aligns with enemy.pos center
         """
 
         # Rotate angle to face target
@@ -114,12 +113,8 @@ class Enemy(Actor):  # inherits Actor class to access its methods/prop
         rotated_surf = transform.rotate(self.orig_surf, -self.angle)
         self.mask = mask.from_surface(rotated_surf)  # mask of rotated surface
 
-        # store rotation offset = to rotated surf's top/left relative to enemy pos
-        rotated_rect = rotated_surf.get_rect(
-            center=(self.x, self.y)
-        )  # set rect center to match enemy.pos
-        self.mask_offset_x = self.x - rotated_rect.left
-        self.mask_offset_y = self.y - rotated_rect.top
+        # Create rotated mask Rect obj center to match enemy.pos
+        self.mask_rect = self.mask.get_rect(center=(self.x, self.y))
 
         # Move toward target center
         # NOTE: velocity vector = unit direction vector * speed * dt
@@ -157,10 +152,12 @@ class Target(Actor):
         Attributes:
             self.pos (int): defines target x and y position by its center
             self.mask (obj): mask object of the loaded target.png
+            self.mask_rect (obj): Rect obj of the mask obj after center matches target.pos center
         """
         super().__init__("target")  # Needs image.png
         self.pos = WIDTH // 2, HEIGHT // 2
         self.mask = mask.from_surface(images.target)
+        self.mask_rect = self.mask.get_rect(center=(self.x, self.y))
 
 
 # TODO 2.2: Spawn multiple enemies at an interval
@@ -237,11 +234,12 @@ def update(dt):
         # # Debug end: test that enemies list is updated by printing
 
         # PIXEL-PERFECT COLLISIOIN DETECTION
-        dx = int(target.x - (enemy.x - enemy.mask_offset_x))  # x offset
-        dy = int(target.y - (enemy.y - enemy.mask_offset_y))  # y offset
+        dx = int(enemy.mask_rect.left - target.mask_rect.left)  # left offset pos
+        dy = int(enemy.mask_rect.top - target.mask_rect.top)  # top offset pos
         collision_point = target.mask.overlap(enemy.mask, (dx, dy))
         if collision_point:  # opaque pixels touch?
             game.game_over = True  # opaque pixels touched -> pause game
+            print("GAME OVER!")
 
 
 # TODO 4: Player interaction
@@ -280,10 +278,10 @@ def draw():
     ):  # iterate for every item in game.enemies list, temp store in enemy var
         enemy.draw()  # draw Enemy obj each iteration
 
-        # DEBUG start: check that size are the same between the actor and mask
-        print(f"Actor w/h {enemy.width}, {enemy.height}")
-        print(f"Mask w/h {enemy.mask.get_size()}")
-        # DEBUG end: check that size are the same between the actor and mask
+        # # DEBUG start: check that size are the same between the actor and mask
+        # print(f"Actor w/h {enemy.width}, {enemy.height}")
+        # print(f"Mask w/h {enemy.mask.get_size()}")
+        # # DEBUG end: check that size are the same between the actor and mask
 
     target.draw()  # draw Target obj
 
