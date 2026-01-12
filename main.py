@@ -166,8 +166,8 @@ class Target(Actor):
 ## Use the udpate() function to create new enemy based on spawn interval
 ### def update(dt) -> dt = time since last frame given automatically by Pygame Zero
 ### if 2 seconds passed since last spawn, add new Enemy obj to the Gamestate enemies list
-## Create a draw() func to paint on screen
-### draw the enemy spawn
+## Create a draw() func to draw enemy spawn
+
 # TODO 6: Loss condition
 # TODO 6.1: End game when enemy reaches the target
 ## in GameState class, add game_over boolean flag to signal ON/OFF game state
