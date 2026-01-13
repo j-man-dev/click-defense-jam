@@ -33,7 +33,7 @@ Planned next:
 
 **Gameplay**
 
-<img src="images/screenshots/core_mechanics_gameplay.png" width="700" alt="Core Mechanic Gameplay">
+<img src="images/screenshots/core_mechanics_gameplay.PNG" width="700" alt="Core Mechanic Gameplay">
 
 ## Installation
 
