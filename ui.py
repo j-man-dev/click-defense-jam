@@ -12,9 +12,16 @@ import pygame  # Pygame Zero uses pygame under the hood
 # TODO 3: create Rect obj from the image and the text image
 ## use Surface_obj.get_rect() method -> each loaded image is a Pygame surface
 
+# TODO 4: Draw image and text on screen in def draw()
+## use screen.blit(image, (left, top)) -> top-left is pos reference point
+### so use image/text rect to center image on the pos provided as input arg
+
+# TODO 5: Check for mouse input in def update()
+## Does button hover over button, if so change text color
+
 
 class Button:
-    """This class is used to create buttons for UI element."""
+    """This class is used to create buttons for UI."""
 
     def __init__(
         self,
@@ -66,12 +73,18 @@ class Button:
             self.image = self.text
 
         # Create Rect obj from the image and text image and align center points
-        self.rect = self.image.get_rect(center=(self.x, self.y))
+        self.image_rect = self.image.get_rect(center=(self.x, self.y))
         self.text_rect = self.text.get_rect(center=(self.x, self.y))
 
     def draw(self, screen):
-        # draw your thing on the screen
-        pass
+        """_summary_
+
+        Args:
+            screen (obj): Pygame screen object that represents game screen
+        """
+        if self.image is not None:
+            screen.blit(self.image, self.image_rect)
+        screen.blit(self.text, self.text_rect)
 
     def update(self, dt=None):
         # move it, animate it, handle logic
