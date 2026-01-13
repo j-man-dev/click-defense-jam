@@ -22,8 +22,8 @@ if TYPE_CHECKING:
 
 
 # Screen resolution 1280x720
-WIDTH = 1280  # constant variable for horizontal size
-HEIGHT = 720  # constant variable for vertical size
+WIDTH = 1920  # constant variable for horizontal size
+HEIGHT = 1080  # constant variable for vertical size
 
 
 class Enemy(Actor):  # inherits Actor class to access its methods/prop
@@ -138,18 +138,22 @@ class GameState:
 
         Attributes:
             self.enemies (list): Store list of Enemy Actor objects. 0 enemies at start
-            self.spawn_timer (int): timer counting in secs since last spawn. Starts at 0.
-            self.spawn_interval (int): Define how often enemy spawn.
             self.score (int): tracks player's score. Start at 0
+            self.spawn_timer (int): timer counting in secs since last spawn. Starts at 0.
+            self.spawn_interval (int): Define how often enemy spawn per sec
+            self.spawn_interval_decrease (int): amount of secs to decrease spawn_interval by
+            self.difficulty_score_interval (int): points required to trigger difficulty
             self.game_over (bool): Boolean flag set to False to signal game is not over
         """
         # Current screen/mode (menu, playing, game_over)
 
         # Gameplay data
         self.enemies = []
+        self.score = 0
         self.spawn_timer = 0
         self.spawn_interval = 2
-        self.score = 0
+        self.spawn_interval_decrease = 0.1
+        self.difficulty_score_interval = 5
 
         # Menu data
 
@@ -164,7 +168,7 @@ target = Target()  # creates instance of Target class (Actor obj)
 
 def update(dt):
     """update() loop called automatically by Pygame Zero 60x/sec.
-    It handles game logic: spawn rate, movement, collisions, scoring.
+    It handles game logic: spawn rate, movement, collisions, scoring,
 
     Args:
         dt (float): delta time is time since last frame. Given automatically by Pygame Zero
@@ -195,6 +199,14 @@ def update(dt):
             print("GAME OVER!")
 
 
+# TODO 1: Difficultly-scaling: Decrease spawn interval by x seconds every time score increase by y
+## Create a GameState attribute for score trigger and spawn rate decrease value
+## def on_mouse_down: When player clicks enemy, check if score increased by y
+### decrease spawn_interval by x secs -> spawn_interval*(1 - x)
+# TODO 2: Create a cap limit to the max spawn rate
+## udpate if statement to make sure current spawn interval never goes below 0.2/sec
+
+
 def on_mouse_down(pos, button):
     """Remove enemies at mouse click pos
 
@@ -206,9 +218,16 @@ def on_mouse_down(pos, button):
         if button == mouse.LEFT and enemy.collidepoint(pos):
             game.enemies.remove(enemy)
             game.score += 1
-            # # DEBUG start: test that the score accumulate when enemy is removed
-            # print(game.score)
-            # # DEBUG end: test that the score accumulate when enemy is removed
+            # Difficulty-scaling: Increase spawn freq every x points
+            if (
+                game.score % game.difficulty_score_interval == 0
+            ):  # is score cleanly divisibly by score interval?
+                game.spawn_interval = max(
+                    0.2, game.spawn_interval * (1 - game.spawn_interval_decrease)
+                )  # don't let spawn interval go below 0.2s
+
+            # DEBUG: check that spawn interval decreases every 10 points
+            print(f"score: {game.score}\nspawn interval: {game.spawn_interval}")
 
 
 def draw():
