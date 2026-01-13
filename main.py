@@ -226,13 +226,22 @@ def on_mouse_down(pos, button):
                     0.2, game.spawn_interval * (1 - game.spawn_interval_decrease)
                 )  # don't let spawn interval go below 0.2s
 
-            # DEBUG: check that spawn interval decreases every 5 points
-            print(f"score: {game.score}\nspawn interval: {game.spawn_interval}")
+            # # DEBUG start: check that spawn interval decreases every 5 points
+            # print(f"score: {game.score}\nspawn interval: {game.spawn_interval}")
+            # # DEBUG end: check that spawn interval decreases every 5 points
+
+
+# TODO 1: Draw score text in top-left corner of screen
+## use screen.draw.text(text, [pos])
+## placement: top-left corner
+## load custom font
+## have an outline for better visibilty
 
 
 def draw():
     """draw() automatically by Pygame Zero when it needs to redraw your game window.
-    It handles painting the enemy and target on the screen
+    It handles displaying the target, enemy movement, score,
+    and game state (menu, playing, game over) on screen
     """
     screen.clear()  # erases old drawings when draw() is called
 
@@ -242,6 +251,16 @@ def draw():
         enemy.draw()  # draw Enemy obj each iteration
 
     target.draw()  # draw Target obj
+
+    # Display current score
+    screen.draw.text(
+        f"Score: {game.score}",
+        (10, 0),
+        fontname="love_days",
+        fontsize=72,
+        owidth=1,
+        ocolor="pink",
+    )
 
 
 # start pygame zero game loop using Python interpreter to run
