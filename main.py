@@ -235,6 +235,7 @@ def draw():
     It handles painting the enemy and target on the screen
     """
     screen.clear()  # erases old drawings when draw() is called
+
     for enemy in (
         game.enemies
     ):  # iterate for every item in game.enemies list, temp store in enemy var
