@@ -226,7 +226,7 @@ def on_mouse_down(pos, button):
                     0.2, game.spawn_interval * (1 - game.spawn_interval_decrease)
                 )  # don't let spawn interval go below 0.2s
 
-            # DEBUG: check that spawn interval decreases every 10 points
+            # DEBUG: check that spawn interval decreases every 5 points
             print(f"score: {game.score}\nspawn interval: {game.spawn_interval}")
 
 
