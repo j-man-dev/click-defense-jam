@@ -1,9 +1,8 @@
 import pgzrun
-from pygame import mask
 from typing import TYPE_CHECKING, Any
 
 from game_state import GameState
-from entities import Enemy
+from entities import Enemy, Target
 
 # Avoid Pylance 'not defined' warnings for Pygame Zero objects
 if TYPE_CHECKING:
@@ -26,26 +25,9 @@ if TYPE_CHECKING:
 WIDTH = 1920  # constant variable for horizontal size
 HEIGHT = 1080  # constant variable for vertical size
 
-
-class Target(Actor):
-    def __init__(self):
-        """Calls parent Actor constructor w/ input enemy.png
-            Defines the random position of the enemy
-
-        Attributes:
-            self.pos (int): defines target x and y position by its center
-            self.mask (obj): mask object of the loaded target.png
-            self.mask_rect (obj): Rect obj of the mask obj after center matches target.pos center
-        """
-        super().__init__("target")  # Needs image.png
-        self.pos = WIDTH // 2, HEIGHT // 2
-        self.mask = mask.from_surface(images.target)
-        self.mask_rect = self.mask.get_rect(center=(self.x, self.y))
-
-
-# Create instance obj
-game = GameState()  # creates instance of GameState class
-target = Target()  # creates instance of Target class (Actor obj)
+# Instances of classes
+game = GameState()
+target = Target(image="target", screen_width=WIDTH, screen_height=HEIGHT)
 
 
 def update(dt):
@@ -79,7 +61,7 @@ def update(dt):
 
 
 def on_mouse_down(pos, button):
-    """Remove enemies at mouse click pos
+    """Remove enemies at mouse click pos. Called automatically by Pygame zero
 
     Args:
         pos (tuple): (x, y) tuple that gives location of mouse pointer when button pressed.

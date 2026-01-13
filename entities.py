@@ -18,10 +18,11 @@ class Enemy(Actor):  # inherits Actor class to access its methods/prop
 
 
         """
-        """Calls parent Actor constructor w/ input enemy.png
+        """Calls parent Actor constructor w/ passed image.png file
             Defines the random position of the enemy
 
         Args:
+            image (str): the name of the image to create an Actor obj
             screen_width (int): horizontal size of game screen in pixels
             screen_height (int): vertical size of game screen in pixels
 
@@ -33,7 +34,9 @@ class Enemy(Actor):  # inherits Actor class to access its methods/prop
             self.anchor (str): defines reference point for position
         """
 
-        super().__init__(image)  # Calls Actor via pgzrun magic from main.py
+        super().__init__(
+            image
+        )  # Calls Actor class to create Actor obj from image param
         self.speed = 80  # px/sec
         self.spawn_pos(
             screen_width, screen_height
@@ -105,3 +108,21 @@ class Enemy(Actor):  # inherits Actor class to access its methods/prop
         if dist > 5:  # prevents division by 0 error
             self.x += dx / dist * self.speed * dt
             self.y += dy / dist * self.speed * dt
+
+
+class Target(Actor):
+    def __init__(self, image, screen_width, screen_height):
+        """Calls parent Actor constructor w/ input enemy.png
+            Defines the random position of the enemy
+
+        Attributes:
+            self.pos (int): defines target x and y position by its center
+            self.mask (obj): mask object of the loaded target.png
+            self.mask_rect (obj): Rect obj of the mask obj after center matches target.pos center
+        """
+        super().__init__(
+            image
+        )  # Calls Actor class to create Actor obj from image param
+        self.pos = screen_width // 2, screen_height // 2
+        self.mask = mask.from_surface(images.target)
+        self.mask_rect = self.mask.get_rect(center=(self.x, self.y))
