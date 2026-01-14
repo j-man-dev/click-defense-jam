@@ -41,32 +41,57 @@ def update(dt):
     if game.game_over:  # is game_over True?
         return  # Exit out of def update() game loop/freezes screen
 
-    # Enemy spawn rate
-    game.spawn_timer += dt  # spawn timer increases every frame by dt value
+    # Enemy spawn when game state is "PLAY"
+    if game.state == "PLAY":
+        # Enemy spawn rate
+        game.spawn_timer += dt  # spawn timer increases every frame by dt value
 
-    if game.spawn_timer > game.spawn_interval:
-        enemy = Enemy(image="enemy", screen_width=WIDTH, screen_height=HEIGHT)
-        game.enemies.append(enemy)  # New Enemy obj created and appended to enemies list
-        game.spawn_timer = 0  # reset spawn timer after new enemy spawns
-    for enemy in game.enemies:  # iterate through game.enemies Enemy obj list
-        enemy.update(target, dt)  # update enemy angle to face target center
+        if game.spawn_timer > game.spawn_interval:
+            enemy = Enemy(image="enemy", screen_width=WIDTH, screen_height=HEIGHT)
+            game.enemies.append(
+                enemy
+            )  # New Enemy obj created and appended to enemies list
+            game.spawn_timer = 0  # reset spawn timer after new enemy spawns
+        for enemy in game.enemies:  # iterate through game.enemies Enemy obj list
+            enemy.update(target, dt)  # update enemy angle to face target center
 
-        # PIXEL-PERFECT COLLISIOIN DETECTION
-        dx = int(enemy.mask_rect.left - target.mask_rect.left)  # left offset pos
-        dy = int(enemy.mask_rect.top - target.mask_rect.top)  # top offset pos
-        collision_point = target.mask.overlap(enemy.mask, (dx, dy))
-        if collision_point:  # opaque pixels touch?
-            game.game_over = True  # opaque pixels touched -> pause game
-            print("GAME OVER!")
+            # PIXEL-PERFECT COLLISIOIN DETECTION
+            dx = int(enemy.mask_rect.left - target.mask_rect.left)  # left offset pos
+            dy = int(enemy.mask_rect.top - target.mask_rect.top)  # top offset pos
+            collision_point = target.mask.overlap(enemy.mask, (dx, dy))
+            if collision_point:  # opaque pixels touch?
+                game.game_over = True  # opaque pixels touched -> pause game
+
+
+# TODO: Create statement that changes game state based on what button was clicked on Menu
+## if start menu button clicked, start the game, else if quit clicked, quit and exit.
+### use rect.collidepoint(pos) -> requires Rect obj
+### create a quit method in GameState and call it
+## global update() loop include if statement to start enemy spawn when game.state = "PLAY"
 
 
 def on_mouse_down(pos, button):
-    """Remove enemies at mouse click pos. Called automatically by Pygame zero
+    """Called automatically by Pygame zero
+    Mouse clicks handlings the following event hooks:
+    Left click on enemies remove them.
+    Main menu button clicks starts or exits game.
+    Game over screen button clicks restarts or exits game.
 
     Args:
         pos (tuple): (x, y) tuple that gives location of mouse pointer when button pressed.
         button (obj): A mouse enum value indicating the button that was pressed.
     """
+
+    # Menu screen actions
+    if game.state == "MENU":
+        # Start game when start clicked
+        if game.menu_buttons["START"].image_rect.collidepoint(pos):
+            game.state = "PLAY"
+        # Quit and exit game when quit clicked
+        elif game.menu_buttons["QUIT"].image_rect.collidepoint(pos):
+            game.quit()
+
+    # removes enemies when clicked
     for enemy in game.enemies:
         if button == mouse.LEFT and enemy.collidepoint(pos):
             game.enemies.remove(enemy)
@@ -87,7 +112,7 @@ def draw():
     """
     screen.clear()  # erases old drawings when draw() is called
 
-    # display menu game.state set to "MENU" by default
+    # Use current game.state value to decide what to draw. Default value set to "MENU"
     game.render_map[game.state](screen=screen)  # calls the game obj draw_menu() method
 
     # display when playing

@@ -1,18 +1,8 @@
+import sys
+import pygame
 from ui import Button
 
-# TODO goal: create methods in GameState class that draws each screen state when called
-
-# TODO 1: Add attributes for menu data and current screen state
-## state: menu, playing, game_over
-## render map: map game state to screen methods
-## menu selection: start, quit selection
-## create buttons required for each state screen
-
-# TODO 2: create the draw menu screen method
-## requires screen as input parameter
-## fill the screen with a background
-## draw text for game title
-## draw all the menu_buttons on the menu screen
+# TODO
 
 
 class GameState:
@@ -107,3 +97,8 @@ class GameState:
     # placehodler for game over screen
     def draw_game_over(self, screen: object):
         pass
+
+    def quit(self):
+        """Quits and exits the game."""
+        pygame.quit()  # Uninitalizes all pygame modules
+        sys.exit()  # terminates Python process and closes game window
