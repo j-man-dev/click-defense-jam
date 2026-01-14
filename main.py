@@ -3,7 +3,6 @@ from typing import TYPE_CHECKING, Any
 
 from game_state import GameState
 from entities import Enemy, Target
-from ui import Button
 
 # Avoid Pylance 'not defined' warnings for Pygame Zero objects
 if TYPE_CHECKING:
@@ -80,22 +79,6 @@ def on_mouse_down(pos, button):
                     0.2, game.spawn_interval * (1 - game.spawn_interval_decrease)
                 )  # don't let spawn interval go below 0.2s
 
-            # # DEBUG start: check that spawn interval decreases every 5 points
-            # print(f"score: {game.score}\nspawn interval: {game.spawn_interval}")
-            # # DEBUG end: check that spawn interval decreases every 5 points
-
-
-# DEBUG start: use Button class to create text button called Test Button
-## changes from white to pink when hovered over
-test_button = Button(
-    pos=(WIDTH // 2, 100),
-    text_input="Test Button",
-    font_path="fonts/love_days.ttf",
-    fontsize=100,
-    base_color="white",
-    hovering_color="pink",
-)
-
 
 def draw():
     """draw() automatically by Pygame Zero when it needs to redraw your game window.
@@ -104,26 +87,27 @@ def draw():
     """
     screen.clear()  # erases old drawings when draw() is called
 
-    for enemy in (
-        game.enemies
-    ):  # iterate for every item in game.enemies list, temp store in enemy var
-        enemy.draw()  # draw Enemy obj stored in actor attribute
+    # display menu game.state set to "MENU" by default
+    game.render_map[game.state](screen=screen)  # calls the game obj draw_menu() method
 
-    target.draw()  # draw Target obj
+    # display when playing
+    if game.state == "PLAY":
+        for enemy in (
+            game.enemies
+        ):  # iterate for every item in game.enemies list, temp store in enemy var
+            enemy.draw()  # draw Enemy obj stored in actor attribute
 
-    # Display current score
-    screen.draw.text(
-        f"Score: {game.score}",
-        (10, 0),
-        fontname="love_days",
-        fontsize=100,
-        owidth=1,
-        ocolor="pink",
-    )
+        target.draw()  # draw Target obj
 
-    # DEBUG end: use Button class to create text button called Test Button
-    ## changes from white to pink when hovered over
-    test_button.draw(screen=screen)  # calls the Button draw method to draw onto screen
+        # Display current score
+        screen.draw.text(
+            f"Score: {game.score}",
+            (10, 0),
+            fontname="love_days",
+            fontsize=100,
+            owidth=1,
+            ocolor="pink",
+        )
 
 
 # start pygame zero game loop using Python interpreter to run
