@@ -116,7 +116,7 @@ def draw():
         f"Score: {game.score}",
         (10, 0),
         fontname="love_days",
-        fontsize=72,
+        fontsize=100,
         owidth=1,
         ocolor="pink",
     )
