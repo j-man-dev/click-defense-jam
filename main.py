@@ -91,7 +91,7 @@ test_button = Button(
     pos=(WIDTH // 2, 100),
     text_input="Test Button",
     font_path="fonts/love_days.ttf",
-    fontsize=72,
+    fontsize=100,
     base_color="white",
     hovering_color="pink",
 )
