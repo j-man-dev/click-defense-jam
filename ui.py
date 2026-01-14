@@ -16,8 +16,9 @@ import pygame  # Pygame Zero uses pygame under the hood
 ## use screen.blit(image, (left, top)) -> top-left is pos reference point
 ### so use image/text rect to center image on the pos provided as input arg
 
-# TODO 5: Check for mouse input in def update()
-## Does button hover over button, if so change text color
+# TODO 5: Create event handling func for mouse hover
+## Does mouse position hover over button, if so change color
+## rect.collidepoint(pos) -> requires rect obj.
 
 
 class Button:
@@ -72,12 +73,12 @@ class Button:
         if self.image is None:
             self.image = self.text
 
-        # Create Rect obj from the image and text image and align center points
+        # Create Rect obj from the image and text image aligned at pos center point
         self.image_rect = self.image.get_rect(center=(self.x, self.y))
         self.text_rect = self.text.get_rect(center=(self.x, self.y))
 
-    def draw(self, screen):
-        """_summary_
+    def draw(self, screen: object):
+        """Draws the image and text onto the screen at the specified position.
 
         Args:
             screen (obj): Pygame screen object that represents game screen
@@ -86,10 +87,17 @@ class Button:
             screen.blit(self.image, self.image_rect)
         screen.blit(self.text, self.text_rect)
 
+    def change_color(self, pos: tuple[int, int]):
+        """Changes button text color when mouse hovers over button.
+
+        Args:
+            pos (tuple[int, int]): (x, y) tuple, mouse position
+        """
+        if self.image_rect.collidepoint(pos):  # does mousepointer hover button rect?
+            self.text = self.font.render(
+                text=self.text_input, antialias=True, color=self.hover_color
+            )  # change self.text color to hovering_color
+
     def update(self, dt=None):
         # move it, animate it, handle logic
-        pass
-
-    def handle_event(self, event_data):
-        # optional: clicks, keyboard, etc.
         pass
