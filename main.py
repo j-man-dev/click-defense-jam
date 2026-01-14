@@ -3,6 +3,7 @@ from typing import TYPE_CHECKING, Any
 
 from game_state import GameState
 from entities import Enemy, Target
+from ui import Button
 
 # Avoid Pylance 'not defined' warnings for Pygame Zero objects
 if TYPE_CHECKING:
@@ -84,6 +85,18 @@ def on_mouse_down(pos, button):
             # # DEBUG end: check that spawn interval decreases every 5 points
 
 
+# DEBUG start: use Button class to create text button called Test Button
+## changes from white to pink when hovered over
+test_button = Button(
+    pos=(WIDTH // 2, 100),
+    text_input="Test Button",
+    font_path="fonts/love_days.ttf",
+    fontsize=72,
+    base_color="white",
+    hovering_color="pink",
+)
+
+
 def draw():
     """draw() automatically by Pygame Zero when it needs to redraw your game window.
     It handles displaying the target, enemy movement, score,
@@ -107,6 +120,10 @@ def draw():
         owidth=1,
         ocolor="pink",
     )
+
+    # DEBUG end: use Button class to create text button called Test Button
+    ## changes from white to pink when hovered over
+    test_button.draw(screen=screen)  # calls the Button draw method to draw onto screen
 
 
 # start pygame zero game loop using Python interpreter to run

@@ -13,6 +13,8 @@ class GameState:
         """
         # Current screen/mode (menu, playing, game_over)
 
+        # Menu data
+
         # Gameplay data
         self.enemies = []
         self.score = 0
@@ -20,8 +22,6 @@ class GameState:
         self.spawn_interval = 2
         self.spawn_interval_decrease = 0.1
         self.difficulty_score_interval = 5
-
-        # Menu data
 
         # Game over data
         self.game_over = False

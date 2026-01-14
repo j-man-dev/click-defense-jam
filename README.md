@@ -40,7 +40,10 @@ Planned next:
 1. Clone or download this repository.
 2. Navigate to the project folder: cd path\to\project\folder
 3. Use **Python 3.12**
-4. Create a virtual environment (if you haven't already): python -m venv venv
+4. Create a virtual environment (if you haven't already): 
+  ```
+  python -m venv venv
+  ```
 5. Activate the virtual environment:
 - On Windows:
   ```
@@ -50,8 +53,11 @@ Planned next:
   ```
   source venv/bin/activate
   ```
-6. Install dependencies: pip install -r requirements.txt
-
+6. Install dependencies: 
+  ```
+  pip install -r requirements.txt
+  ```
+  
 ## How to Run
 
 1. Make sure your virtual environment is active.
