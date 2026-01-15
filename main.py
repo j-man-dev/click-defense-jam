@@ -29,6 +29,8 @@ HEIGHT = 1080  # constant variable for vertical size
 game = GameState()
 target = Target(image="target", screen_width=WIDTH, screen_height=HEIGHT)
 
+# TODO 3: set game.state to GAMEOVER when enemy touches the target
+
 
 def update(dt):
     """update() loop called automatically by Pygame Zero 60x/sec.
@@ -37,9 +39,6 @@ def update(dt):
     Args:
         dt (float): delta time is time since last frame. Given automatically by Pygame Zero
     """
-
-    if game.game_over:  # is game_over True?
-        return  # Exit out of def update() game loop/freezes screen
 
     # Enemy spawn when game state is "PLAY"
     if game.state == "PLAY":
@@ -60,14 +59,8 @@ def update(dt):
             dy = int(enemy.mask_rect.top - target.mask_rect.top)  # top offset pos
             collision_point = target.mask.overlap(enemy.mask, (dx, dy))
             if collision_point:  # opaque pixels touch?
-                game.game_over = True  # opaque pixels touched -> pause game
-
-
-# TODO: Create statement that changes game state based on what button was clicked on Menu
-## if start menu button clicked, start the game, else if quit clicked, quit and exit.
-### use rect.collidepoint(pos) -> requires Rect obj
-### create a quit method in GameState and call it
-## global update() loop include if statement to start enemy spawn when game.state = "PLAY"
+                game.state = "GAMEOVER"  # set state to GAMEOVER
+                return  # exits out of update() loop
 
 
 def on_mouse_down(pos, button):
@@ -105,6 +98,9 @@ def on_mouse_down(pos, button):
                 )  # don't let spawn interval go below 0.2s
 
 
+# TODO 4: Display the GAMEOVER screen when play loses
+
+
 def draw():
     """draw() automatically by Pygame Zero when it needs to redraw your game window.
     It handles displaying the target, enemy movement, score,
@@ -113,7 +109,7 @@ def draw():
     screen.clear()  # erases old drawings when draw() is called
 
     # Use current game.state value to decide what to draw. Default value set to "MENU"
-    game.render_map[game.state](screen=screen)  # calls the game obj draw_menu() method
+    game.render_map[game.state](screen=screen)  # calls draw methods based on state
 
     # display when playing
     if game.state == "PLAY":
@@ -129,7 +125,7 @@ def draw():
             f"Score: {game.score}",
             (10, 0),
             fontname="love_days",
-            fontsize=100,
+            fontsize=72,
             owidth=1,
             ocolor="pink",
         )
