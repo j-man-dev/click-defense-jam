@@ -160,11 +160,15 @@ class GameState:
         # draw final score
         screen.draw.text(
             f"Score:{self.score}",
-            center=(960, 450),
+            center=(960, 465),
             fontname="love_days",
             fontsize=110,
             color="orange",
         )
+
+        # Add extra screen assets
+        screen.blit("heart", (780, 570))  # heart near RETRY button
+        screen.blit("ghost1", (795, 740))  ## ghost near QUIT button
 
         # draw outline text button
         screen.draw.text(
@@ -208,7 +212,7 @@ class GameState:
         self.spawn_timer = 0
         self.spawn_interval = 2
         self.spawn_interval_decrease = 0.1
-        self.difficulty_score_interval = 5
+        self.difficulty_score_interval = 10
         self.speed_min = 80  # px/sec
         self.speed_max = 80
 
@@ -234,19 +238,19 @@ class GameState:
             )
 
             # --- SCALE SPEED RANGE -- #
-            # increase max speed by 10 every 5 points
-            # Formula: 80 + (score // point trigger)*10
-            # increase min speed after > 50 points by 5 every double max speed points
+            # increase max speed by 5 every 10 points
+            # Formula: 80 + (score // point trigger)*5
+            # increase min speed after > 50 points by 2 every 10 points
             # Formula: 80 + ((score - 50))//10*5
 
             # max increases faster than min
-            self.speed_max = 80 + (self.score // self.difficulty_score_interval) * 10
+            self.speed_max = 80 + (self.score // self.difficulty_score_interval) * 5
 
             # Min only starts increasing after 50 points.
-            # -50 delay ensures that speed doesn't increase only by 5 at score 60 and not 30.
+            # -50 delay ensures that speed increase only by 2 at score 60 and not 12.
             if self.score > 50:
                 self.speed_min = (
-                    80 + ((self.score - 50) // (self.difficulty_score_interval * 2)) * 5
+                    80 + ((self.score - 50) // self.difficulty_score_interval) * 2
                 )
 
             # ensure that min and max have a cap speed range (100, 300)

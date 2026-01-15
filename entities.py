@@ -32,7 +32,8 @@ class Enemy(Actor):  # inherits Actor class to access its methods/prop
             self.speed (int): defines speed (px/sec) of the enemy
             self.spawn_pos() (tuple): (int, int) x, y spawn position coordinates
             self.mask (obj): current mask obj of rotated Surface. Updates dynamically
-            self.anchor (str): defines reference point for position
+            self.mask_rect (obj): current mask rect ob of rotated Surface. Updates dynamically
+
         """
 
         super().__init__(image)  # creates Actor obj
@@ -42,7 +43,7 @@ class Enemy(Actor):  # inherits Actor class to access its methods/prop
             screen_width, screen_height
         )  # sets spawn pos relative to screen dimensions
         self.mask = None
-        self.anchor = "center", "center"  # explicit (default)
+        self.mask_rect = None
 
     def spawn_pos(self, screen_width, screen_height):
         """Spawn from edges and corners off-screen."""
@@ -131,3 +132,26 @@ class Target(Actor):
         self.image_surf = pygame.image.load(self.image_path)
         self.mask = mask.from_surface(self.image_surf)
         self.mask_rect = self.mask.get_rect(center=(self.x, self.y))
+
+
+class Player:
+    def __init__(self, image_path):
+        """Creates a player sprite as the mouse cursor.
+
+        Args:
+            image_path(str): path of image.png MUST include file extension. (e.g. "images/myimage.png")
+
+        """
+        self.image = pygame.image.load(image_path).convert_alpha()  # creates surface
+        # Create image Rect obj, the hitbox. Use to sync hitbox center to mouse pos
+        # Rect obj created once at __init__ instead of multiple times in draw() loop
+        self.rect = self.image.get_rect()
+
+    def draw(self, screen):
+        mouse_x, mouse_y = pygame.mouse.get_pos()  # retrieves mouse pos
+        # by default image top-left Rect hitbox stick to mouse.
+        # Syncs hitbox center to mouse pos using Rect .center property
+        self.rect.center = (mouse_x, mouse_y)
+
+        # draw player image at mouse pos.
+        screen.blit(self.image, self.rect)

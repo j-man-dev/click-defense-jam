@@ -5,8 +5,7 @@ import pygame
 
 
 from game_state import GameState
-from entities import Enemy, Target
-from ui import Cursor
+from entities import Enemy, Player, Target
 
 
 # Avoid Pylance 'not defined' warnings for Pygame Zero objects
@@ -38,7 +37,7 @@ target = Target(
     screen_width=WIDTH,
     screen_height=HEIGHT,
 )
-cursor = Cursor(image_path="images/angry_cat.png")
+player = Player(image_path="images/angry_cat.png")
 
 
 def update(dt):
@@ -124,13 +123,20 @@ def on_mouse_down(pos, button):
             elif game.game_over_buttons["QUIT"].image_rect.collidepoint(pos):
                 game.quit()
 
+    # # removes enemies when clicked and scales diffculty base on score
+    # for enemy in game.enemies:
+    #     if button == mouse.LEFT and enemy.collidepoint(pos):
+    #         sounds.squish.play()  # plays squish sound when enemy clicked
+    #         game.enemies.remove(enemy)
+    #         game.score += 1
+    #         # checks if difficulty increase is triggered
+    #         game.update_difficulty()
     # removes enemies when clicked and scales diffculty base on score
     for enemy in game.enemies:
-        if button == mouse.LEFT and enemy.collidepoint(pos):
+        if button == mouse.LEFT and player.rect.colliderect(enemy.mask_rect):
             sounds.squish.play()  # plays squish sound when enemy clicked
             game.enemies.remove(enemy)
             game.score += 1
-
             # checks if difficulty increase is triggered
             game.update_difficulty()
 
@@ -152,7 +158,7 @@ def draw():
             game.enemies
         ):  # iterate for every item in game.enemies list, temp store in enemy var
             enemy.draw()  # draw Enemy obj stored in actor attribute
-        cursor.draw(screen=screen)
+        player.draw(screen=screen)
 
 
 # start pygame zero game loop using Python interpreter to run
