@@ -36,20 +36,20 @@ class GameState:
         # Composition: Create buttons for menu and game over screesn in GameState __init__
         self.menu_buttons = {
             "START": Button(
-                pos=(960, 550),
+                pos=(960, 580),
                 text_input="Start",
                 font_path="fonts/love_days.ttf",
-                fontsize=75,
+                fontsize=100,
                 base_color="white",
-                hovering_color="pink",
+                hovering_color=(236, 140, 128),
             ),
             "QUIT": Button(
-                pos=(960, 700),
+                pos=(960, 750),
                 text_input="Quit",
                 font_path="fonts/love_days.ttf",
-                fontsize=75,
+                fontsize=100,
                 base_color="white",
-                hovering_color="pink",
+                hovering_color=(236, 140, 128),
             ),
         }
 
@@ -95,15 +95,24 @@ class GameState:
         pygame.display.set_caption("Cake Defender - Menu")
 
         # screen background
-        screen.fill("black")
+        screen.blit("menu", (0, 0))
 
-        # draws game title
+        # draw outline text button
         screen.draw.text(
-            "CLICK DEFENSE",
-            center=(960, 200),
+            "Start",
+            center=(960, 580),
             fontname="love_days",
-            fontsize=100,
-            color="purple",
+            fontsize=99,
+            owidth=1,
+            ocolor=(154, 207, 174),
+        )
+        screen.draw.text(
+            "Quit",
+            center=(960, 750),
+            fontname="love_days",
+            fontsize=99,
+            owidth=1,
+            ocolor=(154, 207, 174),
         )
 
         # draw all the menu_buttons
