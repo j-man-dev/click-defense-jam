@@ -28,15 +28,15 @@ Planned next:
 
 **Menu**
 
-<img src="images/screenshots/functional_menu_barebone.PNG" width="700" alt="Game Menu Screen">
+<img src="images/screenshots/menu_screen.PNG" width="700" alt="Game Menu Screen">
 
 **Gameplay**
 
-<img src="images/screenshots/core_mechanics_gameplay.PNG" width="700" alt="Core Mechanic Gameplay">
+<img src="images/screenshots/gameplay_1.PNG" width="700" alt="Core Mechanic Gameplay">
 
 **Game Over**
 
-<img src="images/screenshots/functional_gameover_barebone.PNG" width="700" alt="Game Over Screen">
+<img src="images/screenshots/game_over_screen.PNG" width="700" alt="Game Over Screen">
 
 ## Installation
 
