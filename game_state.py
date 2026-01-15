@@ -4,8 +4,6 @@ import pygame
 from ui import Button
 
 
-# TODO 1: create a state timer attribute and set it to 0
-## this will be used to track time passed after a screen transition
 class GameState:
     def __init__(self):
         """Holds all the game state screen data and variables together (menu, play, end).
@@ -174,8 +172,6 @@ class GameState:
         ) in self.game_over_buttons.values():  # loops through key values: Button objs
             btn.draw(screen)  # calls Button draw() method
 
-    # TODO 2: create method that resets safety timer for new screen transition
-
     def change_state(self, new_state: str):
         """Central hub for all screen transitions
 
@@ -184,8 +180,6 @@ class GameState:
         """
         self.state = new_state
         self.state_timer = 0  # resets timer buffer for new screen
-
-    # TODO 3: update to also reset state_timer to default value
 
     def restart(self):
         """Cleans up game data and prepares for a fresh start"""

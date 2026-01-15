@@ -29,10 +29,6 @@ HEIGHT = 1080  # constant variable for vertical size
 game = GameState()
 target = Target(image="target", screen_width=WIDTH, screen_height=HEIGHT)
 
-# TODO 4: call change_state() where game state is changed due to conditions
-## GAMEOVER screen transition
-## PLAY screen transition
-
 
 def update(dt):
     """update() loop called automatically by Pygame Zero 60x/sec.
@@ -72,6 +68,11 @@ def update(dt):
                 return  # exits out of update() loop
 
 
+# TODO 1: add audio sound whenever enemy is removed
+## use sounds play() to load and play the .wav sound
+## file must be in sounds/ subdirectory for pygame to find it
+
+
 def on_mouse_down(pos, button):
     """Called automatically by Pygame zero
     Mouse clicks handlings the following event hooks:
@@ -107,16 +108,12 @@ def on_mouse_down(pos, button):
     # removes enemies when clicked and scales diffculty base on score
     for enemy in game.enemies:
         if button == mouse.LEFT and enemy.collidepoint(pos):
+            sounds.squish.play()  # plays squish sound when enemy clicked
             game.enemies.remove(enemy)
             game.score += 1
 
             # checks if difficulty increase is triggered
             game.update_difficulty()
-
-            # # DEBUG: test difficulting scaling sppeed and spawn
-            # print(
-            #     f"Score: {game.score} spawn interval: {game.spawn_interval} speed: {enemy.speed}"
-            # )
 
 
 def draw():
