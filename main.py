@@ -88,10 +88,6 @@ def on_mouse_down(pos, button):
     if game.state_timer < 0.5:
         return
 
-    # DEBUG: Check that state_timer resets when state changed.
-    # in PLAY screen click same area where quit is until gameover: reduce accident quit
-    print(f"state timer: {game.state_timer}")
-
     if button == mouse.LEFT:
         # MENU screen actions
         if game.state == "MENU":
