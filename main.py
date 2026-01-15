@@ -29,8 +29,6 @@ HEIGHT = 1080  # constant variable for vertical size
 game = GameState()
 target = Target(image="target", screen_width=WIDTH, screen_height=HEIGHT)
 
-# TODO 3: set game.state to GAMEOVER when enemy touches the target
-
 
 def update(dt):
     """update() loop called automatically by Pygame Zero 60x/sec.
@@ -63,6 +61,10 @@ def update(dt):
                 return  # exits out of update() loop
 
 
+# TODO 1: On game over screen, if RETRY button is clicked, restart the game
+## game data is reset to default settings:
+
+
 def on_mouse_down(pos, button):
     """Called automatically by Pygame zero
     Mouse clicks handlings the following event hooks:
@@ -74,15 +76,21 @@ def on_mouse_down(pos, button):
         pos (tuple): (x, y) tuple that gives location of mouse pointer when button pressed.
         button (obj): A mouse enum value indicating the button that was pressed.
     """
-
-    # Menu screen actions
-    if game.state == "MENU":
-        # Start game when start clicked
-        if game.menu_buttons["START"].image_rect.collidepoint(pos):
-            game.state = "PLAY"
-        # Quit and exit game when quit clicked
-        elif game.menu_buttons["QUIT"].image_rect.collidepoint(pos):
-            game.quit()
+    if button == mouse.LEFT:
+        # MENU screen actions
+        if game.state == "MENU":
+            # Start game when start clicked
+            if game.menu_buttons["START"].image_rect.collidepoint(pos):
+                game.state = "PLAY"
+            # Quit and exit game when quit clicked
+            elif game.menu_buttons["QUIT"].image_rect.collidepoint(pos):
+                game.quit()
+        # GAMEOVER screen actions
+        elif game.state == "GAMEOVER":
+            if game.game_over_buttons["RETRY"].image_rect.collidepoint(pos):
+                game.restart()
+            elif game.game_over_buttons["QUIT"].image_rect.collidepoint(pos):
+                game.quit()
 
     # removes enemies when clicked
     for enemy in game.enemies:
@@ -96,9 +104,6 @@ def on_mouse_down(pos, button):
                 game.spawn_interval = max(
                     0.2, game.spawn_interval * (1 - game.spawn_interval_decrease)
                 )  # don't let spawn interval go below 0.2s
-
-
-# TODO 4: Display the GAMEOVER screen when play loses
 
 
 def draw():
@@ -119,16 +124,6 @@ def draw():
             enemy.draw()  # draw Enemy obj stored in actor attribute
 
         target.draw()  # draw Target obj
-
-        # Display current score
-        screen.draw.text(
-            f"Score: {game.score}",
-            (10, 0),
-            fontname="love_days",
-            fontsize=72,
-            owidth=1,
-            ocolor="pink",
-        )
 
 
 # start pygame zero game loop using Python interpreter to run

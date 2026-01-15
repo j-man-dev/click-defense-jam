@@ -2,11 +2,13 @@ import sys
 import pygame
 from ui import Button
 
-# TODO 1: Create game over buttons using Button class
-## retry and quit button as dictionary of Button objects
+# TODO 1: Create a reset function in GameState class to clear old game data
+## When RETRY button is clicked, game data needs to be reset.
+### enemies, score, spawn timer, spawn interval,
+### spawn decrease interval, difficulty score interval
 
-# TODO 2: Create a draw game over method that displays the ui screen
-## include background, game over title, final score, and all the game over buttons
+# TODO 2: Create a draw method to display PLAY screen
+## display background and current score
 
 
 class GameState:
@@ -17,6 +19,7 @@ class GameState:
             self.state(str): game state as "menu", "playing" and "game_over"
             self.render_map (dict): maps self.state to reference draw screen methods (draw_menu, draw_play, draw_game_over)
             self.menu_buttons(dict): creates menu buttons using Button class and stores them
+            self.game_over_buttons (dict): creates game buttons using Button class and stores them
             self.enemies (list): Store list of Enemy Actor objects. 0 enemies at start
             self.score (int): tracks player's score. Start at 0
             self.spawn_timer (int): timer counting in secs since last spawn. Starts at 0.
@@ -107,12 +110,29 @@ class GameState:
         for btn in self.menu_buttons.values():  # loop through key values: Button obj
             btn.draw(screen)  # calls Button draw() method
 
-    # placeholder for play screen
     def draw_play(self, screen: object):
-        pass
+        """Draws the a gameplay ui onto the screen.
+        Background and current score.
+
+        Args:
+            screen (obj): Pygame Zero Screen object that represents game screen
+        """
+
+        # screen background
+        screen.fill("black")
+
+        # Display current score
+        screen.draw.text(
+            f"Score: {self.score}",
+            (10, 0),
+            fontname="love_days",
+            fontsize=72,
+            owidth=1,
+            ocolor="pink",
+        )
 
     def draw_game_over(self, screen: object):
-        """Draws the the game over ui onto the screen.
+        """Draws the a GAMEOVER ui onto the screen.
         Background, buttons, ui elements.
 
         Args:
@@ -145,6 +165,20 @@ class GameState:
             btn
         ) in self.game_over_buttons.values():  # loops through key values: Button objs
             btn.draw(screen)  # calls Button draw() method
+
+    def restart(self):
+        """Cleans up game data and prepares for a fresh start"""
+
+        # clear game data, reset back to default
+        self.enemies = []
+        self.score = 0
+        self.spawn_timer = 0
+        self.spawn_interval = 2
+        self.spawn_interval_decrease = 0.1
+        self.difficulty_score_interval = 5
+
+        # change game state to PLAY
+        self.state = "PLAY"
 
     def quit(self):
         """Quits and exits the game."""
