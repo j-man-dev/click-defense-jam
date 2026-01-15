@@ -61,10 +61,6 @@ def update(dt):
                 return  # exits out of update() loop
 
 
-# TODO 1: On game over screen, if RETRY button is clicked, restart the game
-## game data is reset to default settings:
-
-
 def on_mouse_down(pos, button):
     """Called automatically by Pygame zero
     Mouse clicks handlings the following event hooks:

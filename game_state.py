@@ -2,13 +2,10 @@ import sys
 import pygame
 from ui import Button
 
-# TODO 1: Create a reset function in GameState class to clear old game data
-## When RETRY button is clicked, game data needs to be reset.
-### enemies, score, spawn timer, spawn interval,
-### spawn decrease interval, difficulty score interval
-
-# TODO 2: Create a draw method to display PLAY screen
-## display background and current score
+# TODO 1: set caption for each screen
+## Menu screen -> game title - Menu
+## Play screen -> game title
+## Game over screen -> game title - Game Over
 
 
 class GameState:
@@ -94,6 +91,9 @@ class GameState:
             screen (obj): Pygame Zero Screen object that represents game screen
         """
 
+        # set window caption
+        pygame.display.set_caption("Cake Defender - Menu")
+
         # screen background
         screen.fill("black")
 
@@ -118,6 +118,9 @@ class GameState:
             screen (obj): Pygame Zero Screen object that represents game screen
         """
 
+        # set window caption
+        pygame.display.set_caption("Cake Defender")
+
         # screen background
         screen.fill("black")
 
@@ -138,6 +141,9 @@ class GameState:
         Args:
             screen (obj): Pygame Zero Screen object that represents game screen
         """
+
+        # set window caption
+        pygame.display.set_caption("Cake Defender - Game Over")
 
         # screen background
         screen.fill("black")

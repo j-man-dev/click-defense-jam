@@ -1,26 +1,6 @@
 import pygame  # Pygame Zero uses pygame under the hood
 
 
-# TODO 1: Create Button class with parameters to create button UI element
-## image_path, pos, text_input, font_path, fontsize, base_color, hovering_color
-
-# TODO 2: Pre-load/render Surface objects for image and text
-# Pre-loading/rendering in __init__ saves a lot of CPU power.
-## pygame.image.load(image_path) -> pygame Surface
-## pygame.font.Fonts(font_path, fontsize) -> returns Font obj
-## use Font_obj.render(text, antialias, color) -> returns Pygame Surface
-
-# TODO 3: create Rect obj from the image and text Surface objects
-## use Surface_obj.get_rect() method -> each loaded image is a Pygame surface
-## used to align center of rendered Surface to center pos argument when drawn on screen.
-
-# TODO 4: Draw image and text on screen in def draw()
-## Check if mouse position hover over button, if so change color
-## rect.collidepoint(pos) -> returns True if mouse position matches Rect obj pos
-## use screen.blit(image, (left, top)) -> to draw on screen. top-left is pos reference point
-### so use image/text Rect obj to center it with the pos input arg
-
-
 class Button:
     """This class is used to create buttons for UI."""
 
