@@ -250,7 +250,7 @@ class GameState:
             # -50 delay ensures that speed increase only by 2 at score 60 and not 12.
             if self.score > 50:
                 self.speed_min = (
-                    80 + ((self.score - 50) // self.difficulty_score_interval) * 2
+                    80 + ((self.score - 50) // self.difficulty_score_interval) * 1
                 )
 
             # ensure that min and max have a cap speed range (100, 300)

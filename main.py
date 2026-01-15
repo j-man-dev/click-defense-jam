@@ -123,14 +123,6 @@ def on_mouse_down(pos, button):
             elif game.game_over_buttons["QUIT"].image_rect.collidepoint(pos):
                 game.quit()
 
-    # # removes enemies when clicked and scales diffculty base on score
-    # for enemy in game.enemies:
-    #     if button == mouse.LEFT and enemy.collidepoint(pos):
-    #         sounds.squish.play()  # plays squish sound when enemy clicked
-    #         game.enemies.remove(enemy)
-    #         game.score += 1
-    #         # checks if difficulty increase is triggered
-    #         game.update_difficulty()
     # removes enemies when clicked and scales diffculty base on score
     for enemy in game.enemies:
         if button == mouse.LEFT and player.rect.colliderect(enemy.mask_rect):

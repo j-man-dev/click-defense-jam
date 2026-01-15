@@ -6,6 +6,19 @@ from pgzero.builtins import Actor
 from pygame import mask, transform
 import pygame
 
+# Global constants
+ENEMY_ASSETS = {
+    "black": {"image": "enemy_black", "path": "images/enemy_black.png"},
+    "blue": {"image": "enemy_blue", "path": "images/enemy_blue.png"},
+    "green": {"image": "enemy_green", "path": "images/enemy_green.png"},
+    "orange": {"image": "enemy_orange", "path": "images/enemy_orange.png"},
+    "pink": {"image": "enemy_pink", "path": "images/enemy_pink.png"},
+    "purple": {"image": "enemy_purple", "path": "images/enemy_purple.png"},
+    "red": {"image": "enemy_red", "path": "images/enemy_red.png"},
+    "teal": {"image": "enemy_teal", "path": "images/enemy_teal.png"},
+    "yellow": {"image": "enemy_yellow", "path": "images/enemy_yellow.png"},
+}
+
 
 class Enemy(Actor):  # inherits Actor class to access its methods/prop
     """Docstring for Enemy
@@ -42,6 +55,7 @@ class Enemy(Actor):  # inherits Actor class to access its methods/prop
         self.spawn_pos(
             screen_width, screen_height
         )  # sets spawn pos relative to screen dimensions
+        self.image_surf = pygame.image.load(self.image_path)
         self.mask = None
         self.mask_rect = None
 
@@ -90,8 +104,7 @@ class Enemy(Actor):  # inherits Actor class to access its methods/prop
         # Rotate angle to face target
         self.angle = self.angle_to(target)  # ANTICLOCKWISE rotation
 
-        # Create rotated surface & mask matching Actor's draw (CW to counter Actor's CCW)
-        self.image_surf = pygame.image.load(self.image_path)
+        # Create rotated surface & mask matching Actor's surf (CW to counter Actor's CCW)
         rotated_surf = transform.rotate(self.image_surf, -self.angle)
         self.mask = mask.from_surface(rotated_surf)  # mask of rotated surface
 
