@@ -4,6 +4,7 @@ from pgzero.builtins import Actor
 from pgzero.loaders import images, sounds  # Manually import the magic loaders
 
 from pygame import mask, transform
+import pygame
 
 
 class Enemy(Actor):  # inherits Actor class to access its methods/prop
@@ -12,7 +13,7 @@ class Enemy(Actor):  # inherits Actor class to access its methods/prop
     Handles enemy spawning, movement toward target.
     """
 
-    def __init__(self, image, speed, screen_width, screen_height):
+    def __init__(self, image, image_path, speed, screen_width, screen_height):
         """
         Docstring for __init__
 
@@ -23,25 +24,23 @@ class Enemy(Actor):  # inherits Actor class to access its methods/prop
 
         Args:
             image (str): the name of the image to create an Actor obj
+            image_path(str): path of image.png MUST include file extension. (e.g. "images/myimage.png")
             screen_width (int): horizontal size of game screen in pixels
             screen_height (int): vertical size of game screen in pixels
 
         Attributes:
             self.speed (int): defines speed (px/sec) of the enemy
-            self.orig_surf (obj): original Surface of loaded enemy.png
             self.spawn_pos() (tuple): (int, int) x, y spawn position coordinates
             self.mask (obj): current mask obj of rotated Surface. Updates dynamically
             self.anchor (str): defines reference point for position
         """
 
-        super().__init__(
-            image
-        )  # Calls Actor class to create Actor obj from image param
+        super().__init__(image)  # creates Actor obj
+        self.image_path = image_path
         self.speed = speed  # px/sec
         self.spawn_pos(
             screen_width, screen_height
         )  # sets spawn pos relative to screen dimensions
-        self.orig_surf = images.enemy
         self.mask = None
         self.anchor = "center", "center"  # explicit (default)
 
@@ -91,7 +90,8 @@ class Enemy(Actor):  # inherits Actor class to access its methods/prop
         self.angle = self.angle_to(target)  # ANTICLOCKWISE rotation
 
         # Create rotated surface & mask matching Actor's draw (CW to counter Actor's CCW)
-        rotated_surf = transform.rotate(self.orig_surf, -self.angle)
+        self.image_surf = pygame.image.load(self.image_path)
+        rotated_surf = transform.rotate(self.image_surf, -self.angle)
         self.mask = mask.from_surface(rotated_surf)  # mask of rotated surface
 
         # Create rotated mask Rect obj center to match enemy.pos
@@ -111,18 +111,23 @@ class Enemy(Actor):  # inherits Actor class to access its methods/prop
 
 
 class Target(Actor):
-    def __init__(self, image, screen_width, screen_height):
+    def __init__(self, image, image_path, screen_width, screen_height):
         """Calls parent Actor constructor w/ input enemy.png
             Defines the random position of the enemy
+        Args:
+            image (str): the name of the image to create an Actor obj
+            image_path(str): path of image.png MUST include file extension. (e.g. "images/myimage.png")
+            screen_width (int): horizontal size of game screen in pixels
+            screen_height (int): vertical size of game screen in pixels
 
         Attributes:
             self.pos (int): defines target x and y position by its center
             self.mask (obj): mask object of the loaded target.png
             self.mask_rect (obj): Rect obj of the mask obj after center matches target.pos center
         """
-        super().__init__(
-            image
-        )  # Calls Actor class to create Actor obj from image param
+        super().__init__(image)  # create Actor obj
+        self.image_path = image_path
         self.pos = screen_width // 2, screen_height // 2
-        self.mask = mask.from_surface(images.target)
+        self.image_surf = pygame.image.load(self.image_path)
+        self.mask = mask.from_surface(self.image_surf)
         self.mask_rect = self.mask.get_rect(center=(self.x, self.y))

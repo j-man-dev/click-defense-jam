@@ -27,7 +27,12 @@ HEIGHT = 1080  # constant variable for vertical size
 
 # Instances of classes
 game = GameState()
-target = Target(image="target", screen_width=WIDTH, screen_height=HEIGHT)
+target = Target(
+    image="cake1",
+    image_path="images/cake1.png",
+    screen_width=WIDTH,
+    screen_height=HEIGHT,
+)
 
 
 def update(dt):
@@ -50,7 +55,11 @@ def update(dt):
             new_speed = game.get_spawn_speed()
 
             enemy = Enemy(
-                image="enemy", speed=new_speed, screen_width=WIDTH, screen_height=HEIGHT
+                image="enemy_pink",
+                image_path="images/enemy_pink.png",
+                speed=new_speed,
+                screen_width=WIDTH,
+                screen_height=HEIGHT,
             )
             game.enemies.append(
                 enemy
@@ -128,12 +137,11 @@ def draw():
 
     # display when playing
     if game.state == "PLAY":
+        target.draw()  # draw Target obj
         for enemy in (
             game.enemies
         ):  # iterate for every item in game.enemies list, temp store in enemy var
             enemy.draw()  # draw Enemy obj stored in actor attribute
-
-        target.draw()  # draw Target obj
 
 
 # start pygame zero game loop using Python interpreter to run
