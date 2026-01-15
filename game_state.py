@@ -228,8 +228,8 @@ class GameState:
                 )
 
             # ensure that min and max have a cap speed range (100, 300)
-            self.speed_min = min(self.speed_min, 100)
-            self.speed_max = min(self.speed_max, 300)
+            self.speed_min = min(self.speed_min, 95)
+            self.speed_max = min(self.speed_max, 200)
 
     # TODO 4: create a method that retrieves the new spawn speed variation range
     ## return the min and max speed

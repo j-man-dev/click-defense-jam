@@ -31,8 +31,7 @@ target = Target(image="target", screen_width=WIDTH, screen_height=HEIGHT)
 
 
 # TODO 1: Create a difficulty increase function and call it each time score increases
-## change enemy speed to random variations
-## keep the lower end of speed range static and increase the higher end speed range by x
+## change newly created enemy speed to random variations, so old enemies keep same speed
 
 
 def update(dt):
@@ -103,7 +102,9 @@ def on_mouse_down(pos, button):
             game.enemies.remove(enemy)
             game.score += 1
 
-            # TODO: increase difficulty when score increases
+            # checks if difficulty increase is triggered
+            game.update_difficulty()
+
             # DEBUG: test difficulting scaling sppeed and spawn
             print(
                 f"Score: {game.score} spawn interval: {game.spawn_interval} speed: {enemy.speed}"
