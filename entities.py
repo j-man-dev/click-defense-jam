@@ -12,7 +12,7 @@ class Enemy(Actor):  # inherits Actor class to access its methods/prop
     Handles enemy spawning, movement toward target.
     """
 
-    def __init__(self, image, screen_width, screen_height):
+    def __init__(self, image, speed, screen_width, screen_height):
         """
         Docstring for __init__
 
@@ -37,7 +37,7 @@ class Enemy(Actor):  # inherits Actor class to access its methods/prop
         super().__init__(
             image
         )  # Calls Actor class to create Actor obj from image param
-        self.speed = 80  # px/sec
+        self.speed = speed  # px/sec
         self.spawn_pos(
             screen_width, screen_height
         )  # sets spawn pos relative to screen dimensions

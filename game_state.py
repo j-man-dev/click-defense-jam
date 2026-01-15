@@ -1,11 +1,9 @@
+import random
 import sys
 import pygame
 from ui import Button
 
-# TODO 1: set caption for each screen
-## Menu screen -> game title - Menu
-## Play screen -> game title
-## Game over screen -> game title - Game Over
+# TODO 1: Add min and max speed attributes for randomized speed variation
 
 
 class GameState:
@@ -23,7 +21,8 @@ class GameState:
             self.spawn_interval (int): Define how often enemy spawn per sec
             self.spawn_interval_decrease (int): amount of secs to decrease spawn_interval by
             self.difficulty_score_interval (int): points required to trigger difficulty
-            self.game_over (bool): Boolean flag set to False to signal game is not over
+            self.speed_min (int): defines min speed (px/sec) of the enemy
+            self.speed_max (int): defines max speed (px/sec) of the enemy
         """
 
         # Current screen/mode (menu, playing, game_over)
@@ -82,6 +81,8 @@ class GameState:
         self.spawn_interval = 2
         self.spawn_interval_decrease = 0.1
         self.difficulty_score_interval = 5
+        self.speed_min = 80  # px/sec
+        self.speed_max = 80
 
     def draw_menu(self, screen: object):
         """Draws the menu ui onto the screen.
@@ -172,6 +173,8 @@ class GameState:
         ) in self.game_over_buttons.values():  # loops through key values: Button objs
             btn.draw(screen)  # calls Button draw() method
 
+    # TODO 3: update restart() method to reset speed_min and speed_max values
+
     def restart(self):
         """Cleans up game data and prepares for a fresh start"""
 
@@ -182,6 +185,8 @@ class GameState:
         self.spawn_interval = 2
         self.spawn_interval_decrease = 0.1
         self.difficulty_score_interval = 5
+        self.speed_min = 80  # px/sec
+        self.speed_max = 80
 
         # change game state to PLAY
         self.state = "PLAY"
@@ -190,3 +195,49 @@ class GameState:
         """Quits and exits the game."""
         pygame.quit()  # Uninitalizes all pygame modules
         sys.exit()  # terminates Python process and closes game window
+
+    # TODO 2: create a method updates the difficulty speed and spawn freqency
+
+    def update_difficulty(self):
+        """Difficulty-scaling: Increase spawn freq and speed based on points"""
+
+        # Only run if requirements are met (e.g. every 5 points)
+        if self.score > 0 and (
+            self.score % self.difficulty_score_interval == 0
+        ):  # cleanly divisble?
+            # --- SCALE SPAWN FREQUENCY --- #
+            # decreases interval by a percentage, capped at 0.2s
+            self.spawn_interval = max(
+                0.2, self.spawn_interval * (1 - self.spawn_interval_decrease)
+            )
+
+            # --- SCALE SPEED RANGE -- #
+            # increase max speed by 10 every 5 points
+            # Formula: 80 + (score // point trigger)*10
+            # increase min speed after > 50 points by 5 every double max speed points
+            # Formula: 80 + ((score - 50))//10*5
+
+            # max increases faster than min
+            self.speed_max = 80 + (self.score // self.difficulty_score_interval) * 10
+
+            # Min only starts increasing after 50 points.
+            # -50 delay ensures that speed doesn't increase only by 5 at score 60 and not 30.
+            if self.score > 50:
+                self.speed_min = (
+                    80 + ((self.score - 50) // (self.difficulty_score_interval * 2)) * 5
+                )
+
+            # ensure that min and max have a cap speed range (100, 300)
+            self.speed_min = min(self.speed_min, 100)
+            self.speed_max = min(self.speed_max, 300)
+
+    # TODO 4: create a method that retrieves the new spawn speed variation range
+    ## return the min and max speed
+
+    def get_spawn_speed(self) -> int:
+        """Retrieves a random speed based on min/max speed
+
+        Returns:
+            int: returns a random speed within speed_min and speed_max range
+        """
+        return random.randint(self.speed_min, self.speed_max)

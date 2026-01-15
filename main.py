@@ -30,9 +30,14 @@ game = GameState()
 target = Target(image="target", screen_width=WIDTH, screen_height=HEIGHT)
 
 
+# TODO 1: Create a difficulty increase function and call it each time score increases
+## change enemy speed to random variations
+## keep the lower end of speed range static and increase the higher end speed range by x
+
+
 def update(dt):
     """update() loop called automatically by Pygame Zero 60x/sec.
-    It handles game logic: spawn rate, movement, collisions, scoring,
+    It handles game logic: spawn rate, movement, collisions, spawn speed.
 
     Args:
         dt (float): delta time is time since last frame. Given automatically by Pygame Zero
@@ -44,7 +49,11 @@ def update(dt):
         game.spawn_timer += dt  # spawn timer increases every frame by dt value
 
         if game.spawn_timer > game.spawn_interval:
-            enemy = Enemy(image="enemy", screen_width=WIDTH, screen_height=HEIGHT)
+            new_speed = game.get_spawn_speed()
+
+            enemy = Enemy(
+                image="enemy", speed=new_speed, screen_width=WIDTH, screen_height=HEIGHT
+            )
             game.enemies.append(
                 enemy
             )  # New Enemy obj created and appended to enemies list
@@ -88,18 +97,17 @@ def on_mouse_down(pos, button):
             elif game.game_over_buttons["QUIT"].image_rect.collidepoint(pos):
                 game.quit()
 
-    # removes enemies when clicked
+    # removes enemies when clicked and scales diffculty base on score
     for enemy in game.enemies:
         if button == mouse.LEFT and enemy.collidepoint(pos):
             game.enemies.remove(enemy)
             game.score += 1
-            # Difficulty-scaling: Increase spawn freq every x points
-            if (
-                game.score % game.difficulty_score_interval == 0
-            ):  # is score cleanly divisibly by score interval?
-                game.spawn_interval = max(
-                    0.2, game.spawn_interval * (1 - game.spawn_interval_decrease)
-                )  # don't let spawn interval go below 0.2s
+
+            # TODO: increase difficulty when score increases
+            # DEBUG: test difficulting scaling sppeed and spawn
+            print(
+                f"Score: {game.score} spawn interval: {game.spawn_interval} speed: {enemy.speed}"
+            )
 
 
 def draw():
