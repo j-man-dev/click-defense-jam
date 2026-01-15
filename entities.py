@@ -1,7 +1,7 @@
 import math
 import random
 from pgzero.builtins import Actor
-from pgzero.loaders import images, sounds  # Manually import the magic loaders
+# from pgzero.loaders import images, sounds  # Manually import the magic loaders
 
 from pygame import mask, transform
 import pygame
