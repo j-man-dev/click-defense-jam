@@ -1,8 +1,13 @@
 import pgzrun
 from typing import TYPE_CHECKING, Any
 
+import pygame
+
+
 from game_state import GameState
 from entities import Enemy, Target
+from ui import Cursor
+
 
 # Avoid Pylance 'not defined' warnings for Pygame Zero objects
 if TYPE_CHECKING:
@@ -33,6 +38,7 @@ target = Target(
     screen_width=WIDTH,
     screen_height=HEIGHT,
 )
+cursor = Cursor(image_path="images/angry_cat.png")
 
 
 def update(dt):
@@ -48,6 +54,9 @@ def update(dt):
 
     # Enemy spawn when game state is "PLAY"
     if game.state == "PLAY":
+        # hide default mouse arrow
+        pygame.mouse.set_visible(False)
+
         # Enemy spawn rate
         game.spawn_timer += dt  # spawn timer increases every frame by dt value
 
@@ -55,8 +64,8 @@ def update(dt):
             new_speed = game.get_spawn_speed()
 
             enemy = Enemy(
-                image="enemy_pink",
-                image_path="images/enemy_pink.png",
+                image="enemy_black",
+                image_path="images/enemy_black.png",
                 speed=new_speed,
                 screen_width=WIDTH,
                 screen_height=HEIGHT,
@@ -74,6 +83,7 @@ def update(dt):
             collision_point = target.mask.overlap(enemy.mask, (dx, dy))
             if collision_point:  # opaque pixels touch?
                 game.change_state("GAMEOVER")  # state = GAMEOVER + reset state_timer
+                pygame.mouse.set_visible(True)
                 return  # exits out of update() loop
 
 
@@ -142,6 +152,7 @@ def draw():
             game.enemies
         ):  # iterate for every item in game.enemies list, temp store in enemy var
             enemy.draw()  # draw Enemy obj stored in actor attribute
+        cursor.draw(screen=screen)
 
 
 # start pygame zero game loop using Python interpreter to run

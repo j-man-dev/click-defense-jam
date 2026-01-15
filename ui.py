@@ -75,3 +75,23 @@ class Button:
         if self.image_path is not None:
             screen.blit(self.image, self.image_rect)
         screen.blit(text_to_draw, self.text_rect)
+
+
+class Cursor:
+    def __init__(self, image_path):
+        """Changes the image of the mouse cursor
+
+        Args:
+            image_path(str): path of image.png MUST include file extension. (e.g. "images/myimage.png")
+
+        """
+        self.image = pygame.image.load(image_path).convert_alpha()  # creates surface
+        self.width, self.height = self.image.get_size()  # returns dimension of image
+        self.offset_x = self.width // 2
+        self.offet_y = self.height // 2
+
+    def draw(self, screen):
+        mouse_x, mouse_y = pygame.mouse.get_pos()  # retrieves mouse pos
+
+        # draw mouse cursor at mouse pos
+        screen.blit(self.image, (mouse_x - self.offset_x, mouse_y - self.offet_y))

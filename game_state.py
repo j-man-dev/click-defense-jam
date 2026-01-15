@@ -55,20 +55,20 @@ class GameState:
 
         self.game_over_buttons = {
             "RETRY": Button(
-                pos=(960, 550),
+                pos=(960, 580),
                 text_input="Retry",
                 font_path="fonts/love_days.ttf",
-                fontsize=75,
+                fontsize=100,
                 base_color="white",
-                hovering_color="pink",
+                hovering_color=(236, 140, 128),
             ),
             "QUIT": Button(
-                pos=(960, 700),
+                pos=(960, 750),
                 text_input="Quit",
                 font_path="fonts/love_days.ttf",
-                fontsize=75,
+                fontsize=100,
                 base_color="white",
-                hovering_color="pink",
+                hovering_color=(236, 140, 128),
             ),
         }
 
@@ -131,16 +131,16 @@ class GameState:
         pygame.display.set_caption("Cake Defender")
 
         # screen background
-        screen.fill("black")
+        screen.blit("play_screen", (0, 0))
 
         # Display current score
         screen.draw.text(
-            f"Score: {self.score}",
-            (10, 0),
+            f"Score:{self.score}",
+            (100, 0),
             fontname="love_days",
             fontsize=72,
             owidth=1,
-            ocolor="pink",
+            ocolor=(154, 207, 174),
         )
 
     def draw_game_over(self, screen: object):
@@ -155,24 +155,33 @@ class GameState:
         pygame.display.set_caption("Cake Defender - Game Over")
 
         # screen background
-        screen.fill("black")
-
-        # draw game over title
-        screen.draw.text(
-            "GAME OVER",
-            center=(960, 200),
-            fontname="love_days",
-            fontsize=100,
-            color="purple",
-        )
+        screen.blit("game_over", (0, 0))
 
         # draw final score
         screen.draw.text(
-            f"Score: {self.score}",
-            center=(960, 400),
+            f"Score:{self.score}",
+            center=(960, 450),
             fontname="love_days",
-            fontsize=80,
-            color="blue",
+            fontsize=110,
+            color="orange",
+        )
+
+        # draw outline text button
+        screen.draw.text(
+            "Retry",
+            center=(960, 580),
+            fontname="love_days",
+            fontsize=99,
+            owidth=1,
+            ocolor=(154, 207, 174),
+        )
+        screen.draw.text(
+            "Quit",
+            center=(960, 750),
+            fontname="love_days",
+            fontsize=99,
+            owidth=1,
+            ocolor=(154, 207, 174),
         )
 
         # draw all the game_over_buttons
