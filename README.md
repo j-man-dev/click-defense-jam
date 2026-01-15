@@ -13,32 +13,38 @@ Click Defense is a beginner-friendly mouse-based game where you defend a central
 Status: In active development (Game Jam WIP).
 
 Current:
-- Core Mechanics:
-    - Player clicks enemy > Enemy disappears
-    - Score increases per enemy destroyed.
-    - Game pauses if enemy reaches target.
-- Features:
-    - Multiple enemies spawn and approach target.
-    - Difficulty scaling - spawn frequency based on score
-    - Score display
+- Bare bone game is completed and fully playable!
 
 
 Planned next:
-- Start screen
-- Game start control
-- Game over screen
-- Restart capability
+- Stretch features:
+  - Difficulty scaling: speed variation
+  - Audio feedback when enemy entity is removed
+  - Visual representation for enemy and objective
+  - UI enchancements
+  - Difficulty ramp visuals
 
 ## Screenshots
+
+**Menu**
+
+<img src="images/screenshots/functional_menu_barebone.PNG" width="700" alt="Game Menu Screen">
 
 **Gameplay**
 
 <img src="images/screenshots/core_mechanics_gameplay.PNG" width="700" alt="Core Mechanic Gameplay">
 
+**Game Over**
+
+<img src="images/screenshots/functional_gameover_barebone.PNG" width="700" alt="Game Over Screen">
+
 ## Installation
 
 1. Clone or download this repository.
-2. Navigate to the project folder: cd path\to\project\folder
+2. Navigate to the project folder
+```
+cd path\to\project\folder
+```
 3. Use **Python 3.12**
 4. Create a virtual environment (if you haven't already): 
   ```
@@ -70,6 +76,30 @@ Planned next:
 - **Buttons**: Start game, restart game, quit game
 
 ## Project Structure
+
+PROJECT_NAME/
+├── docs/
+│   ├── fonts/
+│   └── (design notes, docs, etc.)
+│
+├── images/
+│   ├── screenshots/
+│   │   ├── enemy.png
+│   │   └── target.png
+│   ├── music/
+│   └── sounds/
+│
+├── entities.py
+├── game_state.py
+├── main.py
+├── practice.py
+├── ui.py
+│
+├── README.md
+├── requirements.txt
+├── LICENSE
+├── .gitignore
+└── .python-version
 
 ## Notes / Learning Goals
 
