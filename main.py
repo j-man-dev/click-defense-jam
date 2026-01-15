@@ -29,9 +29,9 @@ HEIGHT = 1080  # constant variable for vertical size
 game = GameState()
 target = Target(image="target", screen_width=WIDTH, screen_height=HEIGHT)
 
-
-# TODO 1: Create a difficulty increase function and call it each time score increases
-## change newly created enemy speed to random variations, so old enemies keep same speed
+# TODO 4: call change_state() where game state is changed due to conditions
+## GAMEOVER screen transition
+## PLAY screen transition
 
 
 def update(dt):
@@ -41,6 +41,9 @@ def update(dt):
     Args:
         dt (float): delta time is time since last frame. Given automatically by Pygame Zero
     """
+
+    # increment the state timer every frame. only resets during screen transition
+    game.state_timer += dt
 
     # Enemy spawn when game state is "PLAY"
     if game.state == "PLAY":
@@ -65,7 +68,7 @@ def update(dt):
             dy = int(enemy.mask_rect.top - target.mask_rect.top)  # top offset pos
             collision_point = target.mask.overlap(enemy.mask, (dx, dy))
             if collision_point:  # opaque pixels touch?
-                game.state = "GAMEOVER"  # set state to GAMEOVER
+                game.change_state("GAMEOVER")  # state = GAMEOVER + reset state_timer
                 return  # exits out of update() loop
 
 
@@ -80,12 +83,21 @@ def on_mouse_down(pos, button):
         pos (tuple): (x, y) tuple that gives location of mouse pointer when button pressed.
         button (obj): A mouse enum value indicating the button that was pressed.
     """
+
+    # only allows mouse clicks if screen has been visible for at least 0.5s
+    if game.state_timer < 0.5:
+        return
+
+    # DEBUG: Check that state_timer resets when state changed.
+    # in PLAY screen click same area where quit is until gameover: reduce accident quit
+    print(f"state timer: {game.state_timer}")
+
     if button == mouse.LEFT:
         # MENU screen actions
         if game.state == "MENU":
             # Start game when start clicked
             if game.menu_buttons["START"].image_rect.collidepoint(pos):
-                game.state = "PLAY"
+                game.change_state("PLAY")  # state = PLAY + reset state_timer
             # Quit and exit game when quit clicked
             elif game.menu_buttons["QUIT"].image_rect.collidepoint(pos):
                 game.quit()
@@ -105,10 +117,10 @@ def on_mouse_down(pos, button):
             # checks if difficulty increase is triggered
             game.update_difficulty()
 
-            # DEBUG: test difficulting scaling sppeed and spawn
-            print(
-                f"Score: {game.score} spawn interval: {game.spawn_interval} speed: {enemy.speed}"
-            )
+            # # DEBUG: test difficulting scaling sppeed and spawn
+            # print(
+            #     f"Score: {game.score} spawn interval: {game.spawn_interval} speed: {enemy.speed}"
+            # )
 
 
 def draw():

@@ -3,9 +3,9 @@ import sys
 import pygame
 from ui import Button
 
-# TODO 1: Add min and max speed attributes for randomized speed variation
 
-
+# TODO 1: create a state timer attribute and set it to 0
+## this will be used to track time passed after a screen transition
 class GameState:
     def __init__(self):
         """Holds all the game state screen data and variables together (menu, play, end).
@@ -83,6 +83,7 @@ class GameState:
         self.difficulty_score_interval = 5
         self.speed_min = 80  # px/sec
         self.speed_max = 80
+        self.state_timer = 0
 
     def draw_menu(self, screen: object):
         """Draws the menu ui onto the screen.
@@ -173,7 +174,18 @@ class GameState:
         ) in self.game_over_buttons.values():  # loops through key values: Button objs
             btn.draw(screen)  # calls Button draw() method
 
-    # TODO 3: update restart() method to reset speed_min and speed_max values
+    # TODO 2: create method that resets safety timer for new screen transition
+
+    def change_state(self, new_state: str):
+        """Central hub for all screen transitions
+
+        Args:
+            new_state (str): Must be a game state "MAIN", "PLAY", "GAMEOVER"
+        """
+        self.state = new_state
+        self.state_timer = 0  # resets timer buffer for new screen
+
+    # TODO 3: update to also reset state_timer to default value
 
     def restart(self):
         """Cleans up game data and prepares for a fresh start"""
@@ -188,15 +200,13 @@ class GameState:
         self.speed_min = 80  # px/sec
         self.speed_max = 80
 
-        # change game state to PLAY
-        self.state = "PLAY"
+        # change game state to PLAY + resets state_timer
+        self.change_state("PLAY")
 
     def quit(self):
         """Quits and exits the game."""
         pygame.quit()  # Uninitalizes all pygame modules
         sys.exit()  # terminates Python process and closes game window
-
-    # TODO 2: create a method updates the difficulty speed and spawn freqency
 
     def update_difficulty(self):
         """Difficulty-scaling: Increase spawn freq and speed based on points"""
@@ -230,9 +240,6 @@ class GameState:
             # ensure that min and max have a cap speed range (100, 300)
             self.speed_min = min(self.speed_min, 95)
             self.speed_max = min(self.speed_max, 200)
-
-    # TODO 4: create a method that retrieves the new spawn speed variation range
-    ## return the min and max speed
 
     def get_spawn_speed(self) -> int:
         """Retrieves a random speed based on min/max speed
