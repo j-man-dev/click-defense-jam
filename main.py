@@ -39,6 +39,10 @@ target = Target(
 )
 player = Player(image_path="images/angry_cat.png")
 
+# TODO 5: When Enemy obj created, use dictionary returned by get_enemy_image()
+# access the 'image' and 'path' key values and pass them to the Enemy class as parameters
+# get_enemy_image["image"] -> image param and get_enemy_image["path"] -> image_path param
+
 
 def update(dt):
     """update() loop called automatically by Pygame Zero 60x/sec.
@@ -63,8 +67,8 @@ def update(dt):
             new_speed = game.get_spawn_speed()
 
             enemy = Enemy(
-                image="enemy_black",
-                image_path="images/enemy_black.png",
+                image=game.get_enemy_image()["image"],
+                image_path=game.get_enemy_image()["path"],
                 speed=new_speed,
                 screen_width=WIDTH,
                 screen_height=HEIGHT,
@@ -84,11 +88,6 @@ def update(dt):
                 game.change_state("GAMEOVER")  # state = GAMEOVER + reset state_timer
                 pygame.mouse.set_visible(True)
                 return  # exits out of update() loop
-
-
-# TODO 1: add audio sound whenever enemy is removed
-## use sounds play() to load and play the .wav sound
-## file must be in sounds/ subdirectory for pygame to find it
 
 
 def on_mouse_down(pos, button):

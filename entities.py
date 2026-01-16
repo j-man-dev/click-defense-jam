@@ -6,7 +6,11 @@ from pgzero.builtins import Actor
 from pygame import mask, transform
 import pygame
 
+# TODO 1: create global variable maping enemy color, image name, and path
+## can be accessed easily by other modules
+
 # Global constants
+# nested dictionary containing enemy images in different colors
 ENEMY_ASSETS = {
     "black": {"image": "enemy_black", "path": "images/enemy_black.png"},
     "blue": {"image": "enemy_blue", "path": "images/enemy_blue.png"},
@@ -23,7 +27,7 @@ ENEMY_ASSETS = {
 class Enemy(Actor):  # inherits Actor class to access its methods/prop
     """Docstring for Enemy
     Moves and rotates enemy to face target.
-    Handles enemy spawning, movement toward target.
+    Handles enemy spawn positions, movement toward target.
     """
 
     def __init__(self, image, image_path, speed, screen_width, screen_height):
