@@ -1,7 +1,16 @@
 import random
 import sys
 import pygame
+from entities import ENEMY_ASSETS
 from ui import Button
+
+# TODO 2: Create global CONSTANT variables so its known not to change them
+
+# Global constants
+MAX_DIFFICULTY_SCORE = 240  # ((current_speed - start speed)//value_increased_by)*points required per interval
+MAX_SPEED_CAP = 200
+MIN_SPEED_CAP = 95
+STAGE_COUNT = 10
 
 
 class GameState:
@@ -25,6 +34,18 @@ class GameState:
 
         # Current screen/mode (menu, playing, game_over)
         self.state = "MENU"  # "MENU", "PLAY", "GAMEOVER"
+
+        # Gameplay data
+        self.enemies = []
+        self.enemy_colors = list(ENEMY_ASSETS.keys())  # retrieves the enemy color names
+        self.score = 0
+        self.spawn_timer = 0
+        self.spawn_interval = 2
+        self.spawn_interval_decrease = 0.1
+        self.difficulty_score_interval = 5
+        self.speed_min = 80  # px/sec
+        self.speed_max = 80
+        self.state_timer = 0
 
         # Map self.state to reference draw screen methods
         self.render_map = {
@@ -71,17 +92,6 @@ class GameState:
                 hovering_color=(236, 140, 128),
             ),
         }
-
-        # Gameplay data
-        self.enemies = []
-        self.score = 0
-        self.spawn_timer = 0
-        self.spawn_interval = 2
-        self.spawn_interval_decrease = 0.1
-        self.difficulty_score_interval = 5
-        self.speed_min = 80  # px/sec
-        self.speed_max = 80
-        self.state_timer = 0
 
     def draw_menu(self, screen: object):
         """Draws the menu ui onto the screen.
@@ -224,6 +234,52 @@ class GameState:
         pygame.quit()  # Uninitalizes all pygame modules
         sys.exit()  # terminates Python process and closes game window
 
+    # TODO 3: Create a method that gets the difficulty stage level based on game progression
+    ## use LERP (linear interpolation) for smooth, natural progression
+    ## it finds a value at a specific percentage b/w 2 points
+    ## formula: start + (end - start) * progress -> never overshoots your cap
+    ### start: Where you begin(Score 0, speed 80)
+    ### end: Where you want to finish (Max speed = 200)
+    ### progress: A value between 0.0 (0%) and 1.0 (100%).
+    ### If you were at progress 0.5 (50%), you will be be halfway to a score of 240
+    ### calculate current score progression towards the MAX_DIFFICULTY_SCORE.
+    ### The max progress should only be 1.0 (100%) -> 240/240
+
+    def get_difficulty_stage_progression(self):
+        """Returns a float representing game progress (0.0 - 1.0) based on score and max difficuly score.
+
+        Returns:
+            float: progression value between 0.0 and 1.0 based on current score progress
+        """
+        # progress is a value b/w 0.0 (0%) and 1.0 (100%) so cap at 1.0
+        return min(self.score / MAX_DIFFICULTY_SCORE, 1.0)  # selects lowest b/w the two
+
+    # TODO 4: Create a function that retrieves enemy image based on stage and color index
+    ## self.enemy_colors contain:
+    ## ['black', 'blue', 'green', 'orange', 'pink', 'purple', 'red', 'teal', 'yellow']
+    ## each color represents a stage, except last stage is random. index range 0-8 -> 9 colors
+    ## current_stage = current progression % (0.0-1.0) of the STAGE_COUNT -> ex. 0.5 of 10 stages is stage 5
+    ## color index for stage = current progression of STAGE_COUNT-1 bc indexing starts at 0
+    ## use the index to call and store the color name
+    ## use the color name to return the enemy image from ENEMY_ASSETS dictionary.
+    def get_enemy_image(self):
+        """Determines enemy image name based on score and stage difficulty"""
+        progression = self.get_difficulty_stage_progression()
+
+        # stores the index number 0-8
+        stage_color_index = int(progression * (STAGE_COUNT - 1))
+
+        # LOGICS
+        # if index is 0-8: return the specific color from the self.enemy_colors list
+        # if index is 9 or greater: return a random color from the list
+
+        if stage_color_index >= 9:
+            color_key = random.choice(self.enemy_colors)
+        else:
+            color_key = self.enemy_colors[stage_color_index]
+
+        return ENEMY_ASSETS[color_key]  # returns dict of enemy image based on color
+
     def update_difficulty(self):
         """Difficulty-scaling: Increase spawn freq and speed based on points"""
 
@@ -250,7 +306,7 @@ class GameState:
             # -50 delay ensures that speed increase only by 2 at score 60 and not 12.
             if self.score > 50:
                 self.speed_min = (
-                    80 + ((self.score - 50) // self.difficulty_score_interval) * 2
+                    80 + ((self.score - 50) // self.difficulty_score_interval) * 1
                 )
 
             # ensure that min and max have a cap speed range (100, 300)
