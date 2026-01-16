@@ -4,7 +4,6 @@ import pygame
 from entities import ENEMY_ASSETS
 from ui import Button
 
-# TODO 1: Create global CONSTANT VARIABLES for start and end cap for spawn interval rate
 
 # Global constants
 MAX_DIFFICULTY_SCORE = 240  # ((current_speed - start speed)//value_increased_by)*points required per interval
@@ -14,6 +13,10 @@ MIN_SPEED_CAP = 95  # never let lower speed range go over this
 STAGE_COUNT = 10  # number of difficulty stages in the game
 MAX_SPAWN_CAP = 0.5  # never go below this spawn interval
 MIN_SPAWN_CAP = 2  # never go over this spawn interval
+
+# TODO 2: Create attribute that retrieves the highscore from JSON data storage
+## use dictionary syntax to call key value
+## dict[key]
 
 
 class GameState:
@@ -27,6 +30,7 @@ class GameState:
             self.game_over_buttons (dict): creates game buttons using Button class and stores them
             self.enemies (list): Store list of Enemy Actor objects. 0 enemies at start
             self.score (int): tracks player's score. Start at 0
+            self.storage.setdefault (dict):
             self.spawn_timer (int): timer counting in secs since last spawn. Starts at 0.
             self.spawn_interval (int): Define how often enemy spawn per sec
             self.spawn_interval_decrease (int): amount of secs to decrease spawn_interval by
@@ -41,6 +45,7 @@ class GameState:
         # Gameplay data
         self.enemies = []
         self.enemy_colors = list(ENEMY_ASSETS.keys())  # retrieves the enemy color names
+        self.highscore = storage["highscore"]  # retrives data storage for highscore
         self.score = 0
         self.spawn_timer = 0
         self.spawn_interval = MIN_SPAWN_CAP
@@ -93,6 +98,8 @@ class GameState:
                 hovering_color=(236, 140, 128),
             ),
         }
+
+    # TODO: 4: Display highscore on menu screen
 
     def draw_menu(self, screen: object):
         """Draws the menu ui onto the screen.
@@ -221,7 +228,6 @@ class GameState:
 
         # clear game data, reset back to default
         self.enemies = []
-        self.enemy_colors = list(ENEMY_ASSETS.keys())
         self.score = 0
         self.spawn_timer = 0
         self.spawn_interval = MIN_SPAWN_CAP
@@ -238,7 +244,8 @@ class GameState:
         sys.exit()  # terminates Python process and closes game window
 
     def get_difficulty_stage_progression(self):
-        """Returns a float representing game progress (0.0 - 1.0) based on score milestones
+        """Return a float representing stage progress (0.0 - 1.0) based on score milestones
+        Where MAX_DIFFICULTY_SCORE determines number of stages.
 
         Returns:
             float: progression value between 0.0 and 1.0 based on current score progress
@@ -265,18 +272,11 @@ class GameState:
 
         return ENEMY_ASSETS[color_key]  # returns dict of enemy image based on color
 
-    # TODO 2:Update update_difficulty using LERP (Linear interoperability)
-    ## increase difficulty infintesimally with every point earned instead of sudden jumps after x points
-    ## formula that finds a value at a specific percentage between two points
-    ## decouples math from frame rate/score intervals and focus on progression %
-    ## start + (end - start) * progress
-    ## Start: Where you begin (Score 0 speed = 80).
-    ## End: Where you want to finish (Max speed = 200).
-    ## Progress: A value between 0.0 (0%) and 1.0 (100%).
-    ## remove any attibutes that use score interval trigger and spawn interval decrease rate
-
     def update_difficulty(self):
-        """Difficulty-scaling: Increase spawn freq and speed based score progression"""
+        """Difficulty-scaling: Increase spawn freq and speed based score progression.
+        Uses LERP Linear interoperability formula for smooth progression.
+        Progression based on each point earned. start + (end - start) * progression
+        """
 
         # updates difficulty infinitesimally after every point earned
         progress = self.get_difficulty_stage_progression()  # progression based on score

@@ -19,11 +19,16 @@ if TYPE_CHECKING:
     music: Any
     clock: Any
     anchor: Any
+    storage: Any
 
     # Below are classes/methods.
     class Actor:
         pass
 
+# TODO 1: set a default value for the highscore in case no values are found in game
+# storage.setdefault(key, key-value) -> storage obj stores data in json like python dict.
+
+storage.setdefault("highscore", 0)
 
 # Screen resolution 1280x720
 WIDTH = 1920  # constant variable for horizontal size
@@ -121,13 +126,21 @@ def on_mouse_down(pos, button):
             sounds.squish.play()  # plays squish sound when enemy clicked
             game.enemies.remove(enemy)
             game.score += 1
-            # only check if difficulty increases when score is increased
-            game.update_difficulty()
 
-            # DEBUG: test difficulty scaling speed and spawn freq
-            print(
-                f"Score: {game.score} spawn interval: {game.spawn_interval} speed: {enemy.speed}"
-            )
+            # TODO 3: compare current score against highscore every time score increase
+            ## if current score > highscore then replace highscore with current score
+            ## dict[key] = new value
+
+            ### --- only call when score increases --- ###
+            game.update_difficulty()
+            if game.score > storage["highscore"]:  # score > highscore ?
+                storage["highscore"] = game.score
+
+            # # DEBUG start: test difficulty scaling speed and spawn freq
+            # print(
+            #     f"Score: {game.score} spawn interval: {game.spawn_interval} speed: {enemy.speed}"
+            # )
+            # # DEBUG end: test difficulty scaling speed and spawn freq
 
 
 def draw():
