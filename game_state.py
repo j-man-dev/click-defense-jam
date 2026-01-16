@@ -4,13 +4,16 @@ import pygame
 from entities import ENEMY_ASSETS
 from ui import Button
 
-# TODO 2: Create global CONSTANT variables so its known not to change them
+# TODO 1: Create global CONSTANT VARIABLES for start and end cap for spawn interval rate
 
 # Global constants
 MAX_DIFFICULTY_SCORE = 240  # ((current_speed - start speed)//value_increased_by)*points required per interval
-MAX_SPEED_CAP = 200
-MIN_SPEED_CAP = 95
-STAGE_COUNT = 10
+START_SPEED = 80  # always start speed at this value
+MAX_SPEED_CAP = 200  # never let higher speed range go over this
+MIN_SPEED_CAP = 95  # never let lower speed range go over this
+STAGE_COUNT = 10  # number of difficulty stages in the game
+MAX_SPAWN_CAP = 0.5  # never go below this spawn interval
+MIN_SPAWN_CAP = 2  # never go over this spawn interval
 
 
 class GameState:
@@ -40,11 +43,9 @@ class GameState:
         self.enemy_colors = list(ENEMY_ASSETS.keys())  # retrieves the enemy color names
         self.score = 0
         self.spawn_timer = 0
-        self.spawn_interval = 2
-        self.spawn_interval_decrease = 0.1
-        self.difficulty_score_interval = 5
-        self.speed_min = 80  # px/sec
-        self.speed_max = 80
+        self.spawn_interval = MIN_SPAWN_CAP
+        self.speed_min = START_SPEED  # px/sec
+        self.speed_max = START_SPEED
         self.state_timer = 0
 
         # Map self.state to reference draw screen methods
@@ -136,6 +137,8 @@ class GameState:
         Args:
             screen (obj): Pygame Zero Screen object that represents game screen
         """
+        # hide default mouse arrow bc it will be replaced with player sprite
+        pygame.mouse.set_visible(False)
 
         # set window caption
         pygame.display.set_caption("Cake Defender")
@@ -218,13 +221,13 @@ class GameState:
 
         # clear game data, reset back to default
         self.enemies = []
+        self.enemy_colors = list(ENEMY_ASSETS.keys())
         self.score = 0
         self.spawn_timer = 0
-        self.spawn_interval = 2
-        self.spawn_interval_decrease = 0.1
-        self.difficulty_score_interval = 10
-        self.speed_min = 80  # px/sec
-        self.speed_max = 80
+        self.spawn_interval = MIN_SPAWN_CAP
+        self.speed_min = START_SPEED
+        self.speed_max = START_SPEED
+        self.state_timer = 0
 
         # change game state to PLAY + resets state_timer
         self.change_state("PLAY")
@@ -234,34 +237,16 @@ class GameState:
         pygame.quit()  # Uninitalizes all pygame modules
         sys.exit()  # terminates Python process and closes game window
 
-    # TODO 3: Create a method that gets the difficulty stage level based on game progression
-    ## use LERP (linear interpolation) for smooth, natural progression
-    ## it finds a value at a specific percentage b/w 2 points
-    ## formula: start + (end - start) * progress -> never overshoots your cap
-    ### start: Where you begin(Score 0, speed 80)
-    ### end: Where you want to finish (Max speed = 200)
-    ### progress: A value between 0.0 (0%) and 1.0 (100%).
-    ### If you were at progress 0.5 (50%), you will be be halfway to a score of 240
-    ### calculate current score progression towards the MAX_DIFFICULTY_SCORE.
-    ### The max progress should only be 1.0 (100%) -> 240/240
-
     def get_difficulty_stage_progression(self):
-        """Returns a float representing game progress (0.0 - 1.0) based on score and max difficuly score.
+        """Returns a float representing game progress (0.0 - 1.0) based on score milestones
 
         Returns:
             float: progression value between 0.0 and 1.0 based on current score progress
         """
-        # progress is a value b/w 0.0 (0%) and 1.0 (100%) so cap at 1.0
+        # progress is the current score out of max difficulty score
+        # which gives a value b/w 0.0 (0%) and 1.0 (100%) so cap at 1.0
         return min(self.score / MAX_DIFFICULTY_SCORE, 1.0)  # selects lowest b/w the two
 
-    # TODO 4: Create a function that retrieves enemy image based on stage and color index
-    ## self.enemy_colors contain:
-    ## ['black', 'blue', 'green', 'orange', 'pink', 'purple', 'red', 'teal', 'yellow']
-    ## each color represents a stage, except last stage is random. index range 0-8 -> 9 colors
-    ## current_stage = current progression % (0.0-1.0) of the STAGE_COUNT -> ex. 0.5 of 10 stages is stage 5
-    ## color index for stage = current progression of STAGE_COUNT-1 bc indexing starts at 0
-    ## use the index to call and store the color name
-    ## use the color name to return the enemy image from ENEMY_ASSETS dictionary.
     def get_enemy_image(self):
         """Determines enemy image name based on score and stage difficulty"""
         progression = self.get_difficulty_stage_progression()
@@ -280,43 +265,42 @@ class GameState:
 
         return ENEMY_ASSETS[color_key]  # returns dict of enemy image based on color
 
+    # TODO 2:Update update_difficulty using LERP (Linear interoperability)
+    ## increase difficulty infintesimally with every point earned instead of sudden jumps after x points
+    ## formula that finds a value at a specific percentage between two points
+    ## decouples math from frame rate/score intervals and focus on progression %
+    ## start + (end - start) * progress
+    ## Start: Where you begin (Score 0 speed = 80).
+    ## End: Where you want to finish (Max speed = 200).
+    ## Progress: A value between 0.0 (0%) and 1.0 (100%).
+    ## remove any attibutes that use score interval trigger and spawn interval decrease rate
+
     def update_difficulty(self):
-        """Difficulty-scaling: Increase spawn freq and speed based on points"""
+        """Difficulty-scaling: Increase spawn freq and speed based score progression"""
 
-        # Only run if requirements are met (e.g. every 5 points)
-        if self.score > 0 and (
-            self.score % self.difficulty_score_interval == 0
-        ):  # cleanly divisble?
-            # --- SCALE SPAWN FREQUENCY --- #
-            # decreases interval by a percentage, capped at 0.2s
-            self.spawn_interval = max(
-                0.2, self.spawn_interval * (1 - self.spawn_interval_decrease)
-            )
+        # updates difficulty infinitesimally after every point earned
+        progress = self.get_difficulty_stage_progression()  # progression based on score
 
-            # --- SCALE SPEED RANGE -- #
-            # increase max speed by 5 every 10 points
-            # Formula: 80 + (score // point trigger)*5
-            # increase min speed after > 50 points by 2 every 10 points
-            # Formula: 80 + ((score - 50))//10*5
+        # --- SCALE SPAWN FREQUENCY --- #
+        # cap max spawn interval to ensure it doesn't go below 0.5 using max()
+        self.spawn_interval = max(
+            0.5, MIN_SPAWN_CAP + (MAX_SPAWN_CAP - MIN_SPAWN_CAP) * progress
+        )
 
-            # max increases faster than min
-            self.speed_max = 80 + (self.score // self.difficulty_score_interval) * 5
+        # --- SCALE SPEED RANGE -- #
+        ## LERP linear interoperability (progress) b/w start (80) and speed cap
+        # cap min and max speed to ensure it doesn't go over the defined cap (95 and 200)
+        self.speed_min = min(
+            START_SPEED + (MIN_SPEED_CAP - START_SPEED) * progress, MIN_SPEED_CAP
+        )
+        self.speed_max = min(
+            START_SPEED + (MAX_SPEED_CAP - START_SPEED) * progress, MAX_SPEED_CAP
+        )
 
-            # Min only starts increasing after 50 points.
-            # -50 delay ensures that speed increase only by 2 at score 60 and not 12.
-            if self.score > 50:
-                self.speed_min = (
-                    80 + ((self.score - 50) // self.difficulty_score_interval) * 1
-                )
-
-            # ensure that min and max have a cap speed range (100, 300)
-            self.speed_min = min(self.speed_min, 95)
-            self.speed_max = min(self.speed_max, 200)
-
-    def get_spawn_speed(self) -> int:
-        """Retrieves a random speed based on min/max speed
+    def get_spawn_speed(self) -> float:
+        """Retrieves a random float based on min/max speed to increase smooth movement variety
 
         Returns:
-            int: returns a random speed within speed_min and speed_max range
+            float: returns a random speed within speed_min and speed_max range
         """
-        return random.randint(self.speed_min, self.speed_max)
+        return random.uniform(self.speed_min, self.speed_max)

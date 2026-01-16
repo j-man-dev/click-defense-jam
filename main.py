@@ -39,10 +39,6 @@ target = Target(
 )
 player = Player(image_path="images/angry_cat.png")
 
-# TODO 5: When Enemy obj created, use dictionary returned by get_enemy_image()
-# access the 'image' and 'path' key values and pass them to the Enemy class as parameters
-# get_enemy_image["image"] -> image param and get_enemy_image["path"] -> image_path param
-
 
 def update(dt):
     """update() loop called automatically by Pygame Zero 60x/sec.
@@ -57,9 +53,6 @@ def update(dt):
 
     # Enemy spawn when game state is "PLAY"
     if game.state == "PLAY":
-        # hide default mouse arrow
-        pygame.mouse.set_visible(False)
-
         # Enemy spawn rate
         game.spawn_timer += dt  # spawn timer increases every frame by dt value
 
@@ -86,7 +79,7 @@ def update(dt):
             collision_point = target.mask.overlap(enemy.mask, (dx, dy))
             if collision_point:  # opaque pixels touch?
                 game.change_state("GAMEOVER")  # state = GAMEOVER + reset state_timer
-                pygame.mouse.set_visible(True)
+                pygame.mouse.set_visible(True)  # show regular mouse arrow
                 return  # exits out of update() loop
 
 
@@ -128,8 +121,13 @@ def on_mouse_down(pos, button):
             sounds.squish.play()  # plays squish sound when enemy clicked
             game.enemies.remove(enemy)
             game.score += 1
-            # checks if difficulty increase is triggered
+            # only check if difficulty increases when score is increased
             game.update_difficulty()
+
+            # DEBUG: test difficulty scaling speed and spawn freq
+            print(
+                f"Score: {game.score} spawn interval: {game.spawn_interval} speed: {enemy.speed}"
+            )
 
 
 def draw():

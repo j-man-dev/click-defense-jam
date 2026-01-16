@@ -6,9 +6,6 @@ from pgzero.builtins import Actor
 from pygame import mask, transform
 import pygame
 
-# TODO 1: create global variable maping enemy color, image name, and path
-## can be accessed easily by other modules
-
 # Global constants
 # nested dictionary containing enemy images in different colors
 ENEMY_ASSETS = {
