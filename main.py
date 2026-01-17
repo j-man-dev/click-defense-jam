@@ -74,13 +74,24 @@ def update(dt):
         for enemy in game.enemies:  # iterate through game.enemies Enemy obj list
             enemy.update(target, dt)  # update enemy angle to face target center
 
-            # PIXEL-PERFECT COLLISIOIN DETECTION
+            # TODO 6: call the save data method when GAMEOVER AND data not yet saved
+            ## NOTE: update() loops continues 60 fps even after GAMEOVER
+            ## prevents data saved to JSON every 60fps after GAMEOVER True
+
+            # --- PIXEL-PERFECT COLLISIOIN DETECTION ---#
             dx = int(enemy.mask_rect.left - target.mask_rect.left)  # left offset pos
             dy = int(enemy.mask_rect.top - target.mask_rect.top)  # top offset pos
             collision_point = target.mask.overlap(enemy.mask, (dx, dy))
             if collision_point:  # opaque pixels touch?
                 game.change_state("GAMEOVER")  # state = GAMEOVER + reset state_timer
                 pygame.mouse.set_visible(True)  # show regular mouse arrow
+                # ONLY saves game if GAMEOVER and game not saved yet
+                if game.state == "GAMEOVER" and not game.game_saved:  # default False
+                    game.save_game()  # changes game_saved to true after saved
+
+                    # Debug start: check if game was saved
+                    # print(f"save status: {game.game_saved}")
+                    # Debug end: check if game was saved
                 return  # exits out of update() loop
 
 
@@ -112,7 +123,7 @@ def on_mouse_down(pos, button):
         # GAMEOVER screen actions
         elif game.state == "GAMEOVER":
             if game.game_over_buttons["RETRY"].image_rect.collidepoint(pos):
-                game.restart()
+                game.reset()
             elif game.game_over_buttons["QUIT"].image_rect.collidepoint(pos):
                 game.quit()
 
@@ -122,15 +133,16 @@ def on_mouse_down(pos, button):
             sounds.squish.play()  # plays squish sound when enemy clicked
             game.enemies.remove(enemy)
             game.score += 1
-
+            # TODO 5: call the update highscore method every time a point is scored
             ### --- only call when score increases --- ###
-            game.update_difficulty()
+            game.update_difficulty()  # checks if difficulty needs to be updated
+            game.update_highscore()  # checks if highscore needs to be updated locally
 
-            # # DEBUG start: test difficulty scaling speed and spawn freq
+            # # DEBUG start: check difficulty scaling speed and spawn freq
             # print(
             #     f"Score: {game.score} spawn interval: {game.spawn_interval} speed: {enemy.speed}"
             # )
-            # # DEBUG end: test difficulty scaling speed and spawn freq
+            # # DEBUG end: check difficulty scaling speed and spawn freq
 
 
 def draw():
