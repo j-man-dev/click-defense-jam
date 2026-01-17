@@ -15,6 +15,8 @@ MIN_SPEED_CAP = 95  # never let lower speed range go over this
 STAGE_COUNT = 10  # number of difficulty stages in the game
 MAX_SPAWN_CAP = 0.5  # never go below this spawn interval
 MIN_SPAWN_CAP = 2  # never go over this spawn interval
+SCREEN_WIDTH = 1920
+SCREEN_HEIGHT = 1080
 
 
 class GameState:
@@ -22,7 +24,7 @@ class GameState:
         """Holds all the game state screen data and variables together (menu, play, end).
 
         Attributes:
-            self.state(str): game state as "menu", "playing" and "game_over"
+            self.state(str): game state as "MENU", "PLAY", "GAMEOVER", "PAUSE", "RESUME"
             self.render_map (dict): maps self.state to reference draw screen methods (draw_menu, draw_play, draw_game_over)
             self.menu_buttons(dict): creates menu buttons using Button class and stores them
             self.game_over_buttons (dict): creates game buttons using Button class and stores them
@@ -40,11 +42,6 @@ class GameState:
             self.game_saved(bool): bool flag indicating whether or not game was saved
             self.new_highscore(bool): bool flag indicating whether or not new highscore achieved
         """
-
-        # TODO 1: Define attributes: game data path, centralized data dictionary
-        ## Use pathlib Path class to create Path obj for the game data JSON
-        ## create local centralized data dictionary defining highscore as 0
-        ## create highscore attr that gets highscore from centralized data dict.
 
         self.save_path = Path("game_data.json")  # Path obj of file path
         # --- CENTRALIZED DATA DICTIONARY --- #
@@ -64,14 +61,19 @@ class GameState:
         self.speed_max = START_SPEED
         self.state_timer = 0
 
+        # TODO 1: Add 2 game states for PAUSE and RESUME screens
+        ## add as self.state comment and self.render_map
+
         # Current screen/mode (menu, playing, game_over)
-        self.state = "MENU"  # "MENU", "PLAY", "GAMEOVER"
+        self.state = "MENU"  # "MENU", "PLAY", "GAMEOVER", "PAUSE", "RESUME"
 
         # Map self.state to reference draw screen methods
         self.render_map = {
             "MENU": self.draw_menu,
             "PLAY": self.draw_play,
             "GAMEOVER": self.draw_game_over,
+            "PAUSE": self.draw_pause,
+            # "UNPAUSE": self.draw_unpause,
         }
 
         # Composition: Create buttons for menu and game over screesn in GameState __init__
@@ -115,14 +117,6 @@ class GameState:
         # loads existing data immediately
         self.load_save()
 
-    # TODO 2: Create load game data method that loads data JSON to centralized data dict.
-    ## check that the file path location exists. use .exists() method
-    ## open/read the JSON data (safe: encode using uft-8 to handle future special symbols)
-    ### use with open(path obj, 'r' , encoding="utf-8"), 'r' as file: read mode
-    ##  use .update(json.load(opened file)) to move the opened file data to central data dict
-    ## update the highscore attr with the value updated in centralized data
-    ## call this method immediately in __init__ to load save data to central data dict
-
     def load_save(self):
         """Reads the saved json data file if it exits, otherwise it keeps the default"""
         if self.save_path.exists():  # save_path exists?
@@ -138,10 +132,6 @@ class GameState:
         # print(f"Data successfully loaded: {self.data}")
         # DEBUG end: check data successfully loaded
 
-    # TODO 3: Create method that updates local highscore
-    ## if the current score > highscore, replace highscore with current score
-    ## and update the centralized data dict with the current score
-
     def update_highscore(self):
         """Update the highscore value in memory only (locally), for easy access in code
         and to optimize speed by reducing read/write to JSON file.
@@ -153,13 +143,6 @@ class GameState:
             self.highscore = self.score  # for easy access in code
             self.data["highscore"] = self.score  # to later save to JSON data file
             self.new_highscore = True  # new highscore is achieved
-
-    # TODO 4: Create method that saves the game data to the JSON data file
-    ## open/write the JSON data with the current centralized data dictionary
-    ### use with open(path obj, 'w', encoding=)
-    ### use json.dump(data, opened file, indent=4) add 4 space indents to file for human readability
-    ## call only when game over or player exits to optimize speed (reduce accessing JSON)
-    ## add boolean flag that indicates the game was saved. add as attr default = False
 
     def save_game(self):
         """Call this ONLY when game over or player exits.
@@ -204,9 +187,6 @@ class GameState:
             ocolor=(154, 207, 174),  # green
         )
 
-        # TODO 8: if highscore > 0 then display it on menu screen below quit
-        ## text color: (191, 138, 105) brown
-        # Draw highest score data
         if self.highscore > 0:
             screen.draw.text(
                 f"Highscore: {self.highscore}",
@@ -246,6 +226,56 @@ class GameState:
             ocolor=(154, 207, 174),  # green
         )
 
+        # TODO 2: Create method to draw PAUSE semi-transparent screen
+        ## set caption -> game title - PAUSE
+        ## Create transparent overlay Surface to go over the PLAY screen:
+        ### use pygame.Surface with pygame.SRCALPHA to enable transparency capability on the surface
+        ## fill overlay Surface with tuple (R,G,B,A) -> A: aplha transparency is now enabled
+        ### use semi-transparent A -> 0-255 0 is full transparency
+        ## Draw the PLAY screen
+        ## use screen.blit() to draw the overlay Surface on top.
+        ## Add text: PAUSED press space to resume
+
+    def draw_pause(self, screen: object):
+        """Draws the a PAUSE ui onto the screen.
+        Background, buttons, ui elements.
+
+        Args:
+            screen (obj): Pygame Zero Screen object that represents game screen
+        """
+
+        # set window caption
+        pygame.display.set_caption("Cake Defender - Pause")
+
+        # -- screen background -- #
+        # Create overlay Surface = screen size. Use pygame.Surface with SRCALPHA to enable transparency
+        overlay = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
+        # use Surface_obj.fill() to fill overlay Surface with semi-transparent black color
+        ## (0, 0, 0, 128) -> R,G,B,A -> A (alpha) 0-255, 0 is full transparency
+        overlay.fill((0, 0, 0, 128))
+
+        # draw PLAY screen to be under PAUSE screen
+        self.draw_play(screen)
+
+        # draw the semi-transparent overlay screen on top the PLAY screen
+        # use screen.blit(Surface, pos) with enabled alpha. Requires pygame.Surface as arg
+        screen.blit(overlay, (0, 0))  # top-left pos 0, 0
+
+        # draw UI TEXT on top of overlay
+        screen.draw.text(
+            "PAUSED",
+            center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2),
+            fontname="love_days",
+            fontsize=80,
+        )
+
+        screen.draw.text(
+            "Press space to resume",
+            center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 100),
+            fontname="love_days",
+            fontsize=60,
+        )
+
     def draw_game_over(self, screen: object):
         """Draws the a GAMEOVER ui onto the screen.
         Background, buttons, ui elements.
@@ -259,12 +289,6 @@ class GameState:
 
         # screen background
         screen.blit("game_over", (0, 0))
-
-        # TODO 7: display "New Highscore: <score>" if highscore achieved, otherwise display "Score: <score> ".
-        ## create a boolean flag that indicates whether or not new highscore was achieved
-        ### add it in __init__ and then it gets updated if update_highscore() cond. is met
-        ## at game end, update_highscore() already set highscore = score if score > highscore
-        ## position below QUIT button
 
         # draw final score
         if self.new_highscore:  # new highscore?

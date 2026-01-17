@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING, Any
 import pygame
 
 
-from game_state import GameState
+from game_state import GameState, SCREEN_HEIGHT, SCREEN_WIDTH
 from entities import Enemy, Player, Target
 
 
@@ -26,9 +26,9 @@ if TYPE_CHECKING:
         pass
 
 
-# Screen resolution 1280x720
-WIDTH = 1920  # constant variable for horizontal size
-HEIGHT = 1080  # constant variable for vertical size
+# Screen resolution
+WIDTH = SCREEN_WIDTH  # constant variable for horizontal size
+HEIGHT = SCREEN_HEIGHT  # constant variable for vertical size
 
 # Instances of classes
 game = GameState()
@@ -74,10 +74,6 @@ def update(dt):
         for enemy in game.enemies:  # iterate through game.enemies Enemy obj list
             enemy.update(target, dt)  # update enemy angle to face target center
 
-            # TODO 6: call the save data method when GAMEOVER AND data not yet saved
-            ## NOTE: update() loops continues 60 fps even after GAMEOVER
-            ## prevents data saved to JSON every 60fps after GAMEOVER True
-
             # --- PIXEL-PERFECT COLLISIOIN DETECTION ---#
             dx = int(enemy.mask_rect.left - target.mask_rect.left)  # left offset pos
             dy = int(enemy.mask_rect.top - target.mask_rect.top)  # top offset pos
@@ -93,6 +89,10 @@ def update(dt):
                     # print(f"save status: {game.game_saved}")
                     # Debug end: check if game was saved
                 return  # exits out of update() loop
+
+
+# TODO 3: Create event handler to PAUSE game when space pressed
+## create bool flag that indicates whether or not screen is currently paused
 
 
 def on_mouse_down(pos, button):
@@ -133,7 +133,7 @@ def on_mouse_down(pos, button):
             sounds.squish.play()  # plays squish sound when enemy clicked
             game.enemies.remove(enemy)
             game.score += 1
-            # TODO 5: call the update highscore method every time a point is scored
+
             ### --- only call when score increases --- ###
             game.update_difficulty()  # checks if difficulty needs to be updated
             game.update_highscore()  # checks if highscore needs to be updated locally
@@ -153,6 +153,7 @@ def draw():
     screen.clear()  # erases old drawings when draw() is called
 
     # Use current game.state value to decide what to draw. Default value set to "MENU"
+    # debug: comment code below to enter debug. uncomment to exit debug
     game.render_map[game.state](screen=screen)  # calls draw methods based on state
 
     # display when playing
