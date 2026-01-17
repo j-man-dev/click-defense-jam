@@ -25,10 +25,6 @@ if TYPE_CHECKING:
     class Actor:
         pass
 
-# TODO 1: set a default value for the highscore in case no values are found in game
-# storage.setdefault(key, key-value) -> storage obj stores data in json like python dict.
-
-storage.setdefault("highscore", 0)
 
 # Screen resolution 1280x720
 WIDTH = 1920  # constant variable for horizontal size
@@ -127,14 +123,8 @@ def on_mouse_down(pos, button):
             game.enemies.remove(enemy)
             game.score += 1
 
-            # TODO 3: compare current score against highscore every time score increase
-            ## if current score > highscore then replace highscore with current score
-            ## dict[key] = new value
-
             ### --- only call when score increases --- ###
             game.update_difficulty()
-            if game.score > storage["highscore"]:  # score > highscore ?
-                storage["highscore"] = game.score
 
             # # DEBUG start: test difficulty scaling speed and spawn freq
             # print(

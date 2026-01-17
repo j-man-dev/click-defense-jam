@@ -14,10 +14,6 @@ STAGE_COUNT = 10  # number of difficulty stages in the game
 MAX_SPAWN_CAP = 0.5  # never go below this spawn interval
 MIN_SPAWN_CAP = 2  # never go over this spawn interval
 
-# TODO 2: Create attribute that retrieves the highscore from JSON data storage
-## use dictionary syntax to call key value
-## dict[key]
-
 
 class GameState:
     def __init__(self):
@@ -45,7 +41,6 @@ class GameState:
         # Gameplay data
         self.enemies = []
         self.enemy_colors = list(ENEMY_ASSETS.keys())  # retrieves the enemy color names
-        self.highscore = storage["highscore"]  # retrives data storage for highscore
         self.score = 0
         self.spawn_timer = 0
         self.spawn_interval = MIN_SPAWN_CAP
@@ -98,8 +93,6 @@ class GameState:
                 hovering_color=(236, 140, 128),
             ),
         }
-
-    # TODO: 4: Display highscore on menu screen
 
     def draw_menu(self, screen: object):
         """Draws the menu ui onto the screen.
