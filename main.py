@@ -97,7 +97,7 @@ def update(dt):
     Args:
         dt (float): delta time is time since last frame. Given automatically by Pygame Zero
     """
-    # todo 4: If state is PAUSED and game is resuming, start decr resume_countdown
+    # todo 5: If state is PAUSED and game is resuming, start decr resume_countdown
     ## if resume countdown is <= 0 then change is_resuming back to False
     ## change state to "PLAY"
     if game.state == "PAUSE" and game.is_resuming:  # game resuming?
@@ -124,11 +124,32 @@ def update(dt):
 
 
 # TODO 6: Create event handler to PAUSE game when space pressed
+## use event handling hook on_key_down(key)
 ## create bool flag that indicates whether or not screen is currently paused
 ## if space pressed and  game state is PLAY, then change state PAUSE
 ## if space pressed and game state is PAUSE, then is_resuming = True & countdown = 3.0
 
 
+def on_key_down(key):  # key stores key press input
+    """reads if key pressed is space to pause and resume game.
+    When space pressed on PAUSE state, it resumes the game and sets countdown.
+    When space pressed on PLAY state, it pauses the game.
+
+    Args:
+        key (enum): reads key press inputs
+    """
+
+    if key == key.SPACE:  # is space pressed?
+        if game.state == "PLAY":
+            game.change_state("PAUSE")  # DISPLAY PAUSE SCREEN and pause game
+        elif game.state == "PAUSE":
+            game.is_resuming = True
+            game.resume_countdown = 3.0
+
+
+# TODO 7: disable mouse and key inputs when PAUSE state
+## if state is PAUSED and input is registered,
+## exit out of event handling hook functions -> use return
 def on_mouse_down(pos, button):
     """Called automatically by Pygame zero
     Mouse clicks handlings the following event hooks:
@@ -140,6 +161,10 @@ def on_mouse_down(pos, button):
         pos (tuple): (x, y) tuple that gives location of mouse pointer when button pressed.
         button (obj): A mouse enum value indicating the button that was pressed.
     """
+
+    # block input during PAUSE state
+    if game.state == "PAUSE":
+        return  # exits out of function
 
     # only allows mouse clicks if screen has been visible for at least 0.5s
     if game.state_timer < 0.5:
@@ -186,6 +211,13 @@ def draw():
     """
     screen.clear()  # erases old drawings when draw() is called
 
+    if game.state == "PAUSE":
+        game.draw_play(screen)
+        target.draw()  # draw Target obj
+        # iterate for every item in game.enemies list, temp store in enemy var
+        for enemy in game.enemies:
+            enemy.draw()  # draw Enemy obj stored in actor attribute
+
     # Use current game.state value to decide what to draw. Default value set to "MENU"
     # debug: comment code below to enter debug. uncomment to exit debug
     game.render_map[game.state](screen=screen)  # calls draw methods based on state
@@ -193,9 +225,8 @@ def draw():
     # display when playing
     if game.state == "PLAY":
         target.draw()  # draw Target obj
-        for enemy in (
-            game.enemies
-        ):  # iterate for every item in game.enemies list, temp store in enemy var
+        # iterate for every item in game.enemies list, temp store in enemy var
+        for enemy in game.enemies:
             enemy.draw()  # draw Enemy obj stored in actor attribute
         player.draw(screen=screen)
 

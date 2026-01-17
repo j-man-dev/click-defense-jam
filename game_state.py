@@ -19,12 +19,12 @@ SCREEN_WIDTH = 1920
 SCREEN_HEIGHT = 1080
 
 
-# TODO 3: Create a bool flag that indicates whether or not screen is paused
-## Set default = False -> screen is not PAUSED
+# TODO 2: Create a bool flag that indicates whether or not screen is paused
+## is_resuming -> False means it is paused and true means it is resuming
 ## True means screen is not paused
 
 
-# TODO 5: Create attribute that tracks resume countdown to change to PLAY screen
+# TODO 3: Create attribute that tracks resume countdown to change to PLAY screen
 ## default should be set to 0. also add it to reset() method.
 class GameState:
     def __init__(self):
@@ -70,7 +70,7 @@ class GameState:
         self.speed_max = START_SPEED
         self.state_timer = 0
 
-        # TODO 1: Add 2 game states for PAUSE and RESUME screens
+        # TODO 1: Add game state for PAUSE
         ## add as self.state comment and self.render_map
 
         # Current screen/mode (menu, playing, game_over)
@@ -217,7 +217,6 @@ class GameState:
         """
         # hide default mouse arrow bc it will be replaced with player sprite
         pygame.mouse.set_visible(False)
-
         # set window caption
         pygame.display.set_caption("Cake Defender")
 
@@ -234,7 +233,7 @@ class GameState:
             ocolor=(154, 207, 174),  # green
         )
 
-        # TODO 2: Create method to draw PAUSE semi-transparent screen
+        # TODO 4: Create method to draw PAUSE semi-transparent screen
         ## set caption -> game title - PAUSE
         ## Create transparent overlay Surface to go over the PLAY screen:
         ### use pygame.Surface with pygame.SRCALPHA to enable transparency capability on the surface
@@ -258,9 +257,6 @@ class GameState:
 
         # -- screen background -- #
 
-        # draw PLAY screen to be under PAUSE screen
-        self.draw_play(screen)
-
         # Create overlay Surface = screen size. Use pygame.Surface with SRCALPHA to enable transparency
         overlay = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
         # use Surface_obj.fill() to fill overlay Surface with semi-transparent black color
@@ -279,6 +275,7 @@ class GameState:
             fontsize=80,
         )
 
+        # Draw PAUSE screen if is_resuming is False.
         if not self.is_resuming:
             screen.draw.text(
                 "Press space to resume",
@@ -287,6 +284,7 @@ class GameState:
                 fontsize=60,
             )
 
+        # draw resuming text countdown from 3 to 1, rounding as decr by -= dt
         if self.is_resuming:
             screen.draw.text(
                 f"Resuming in {round(self.resume_countdown)}",
