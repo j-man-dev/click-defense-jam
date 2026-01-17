@@ -19,6 +19,13 @@ SCREEN_WIDTH = 1920
 SCREEN_HEIGHT = 1080
 
 
+# TODO 3: Create a bool flag that indicates whether or not screen is paused
+## Set default = False -> screen is not PAUSED
+## True means screen is not paused
+
+
+# TODO 5: Create attribute that tracks resume countdown to change to PLAY screen
+## default should be set to 0. also add it to reset() method.
 class GameState:
     def __init__(self):
         """Holds all the game state screen data and variables together (menu, play, end).
@@ -50,6 +57,8 @@ class GameState:
 
         # Gameplay data
         self.game_saved = False  # set to False game has not been saved yet
+        self.is_resuming = True  # game is not paused by default
+        self.resume_countdown = 0  # tracks countdown sec til going back to play state
         self.enemies = []
         self.enemy_colors = list(ENEMY_ASSETS.keys())  # retrieves the enemy color names
         self.score = 0
@@ -65,7 +74,7 @@ class GameState:
         ## add as self.state comment and self.render_map
 
         # Current screen/mode (menu, playing, game_over)
-        self.state = "MENU"  # "MENU", "PLAY", "GAMEOVER", "PAUSE", "RESUME"
+        self.state = "MENU"  # "MENU", "PLAY", "GAMEOVER", "PAUSE"
 
         # Map self.state to reference draw screen methods
         self.render_map = {
@@ -73,7 +82,6 @@ class GameState:
             "PLAY": self.draw_play,
             "GAMEOVER": self.draw_game_over,
             "PAUSE": self.draw_pause,
-            # "UNPAUSE": self.draw_unpause,
         }
 
         # Composition: Create buttons for menu and game over screesn in GameState __init__
@@ -234,11 +242,12 @@ class GameState:
         ### use semi-transparent A -> 0-255 0 is full transparency
         ## Draw the PLAY screen
         ## use screen.blit() to draw the overlay Surface on top.
-        ## Add text: PAUSED press space to resume
+        ## text: PAUSED press space to resume if is_paused = True
+        ## text: is_paused False, resume_countdown value rounded to int 0.5+ up, <0.5 down
 
     def draw_pause(self, screen: object):
         """Draws the a PAUSE ui onto the screen.
-        Background, buttons, ui elements.
+        PAUSE text and instruction on how to resume.
 
         Args:
             screen (obj): Pygame Zero Screen object that represents game screen
@@ -248,14 +257,15 @@ class GameState:
         pygame.display.set_caption("Cake Defender - Pause")
 
         # -- screen background -- #
+
+        # draw PLAY screen to be under PAUSE screen
+        self.draw_play(screen)
+
         # Create overlay Surface = screen size. Use pygame.Surface with SRCALPHA to enable transparency
         overlay = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
         # use Surface_obj.fill() to fill overlay Surface with semi-transparent black color
         ## (0, 0, 0, 128) -> R,G,B,A -> A (alpha) 0-255, 0 is full transparency
         overlay.fill((0, 0, 0, 128))
-
-        # draw PLAY screen to be under PAUSE screen
-        self.draw_play(screen)
 
         # draw the semi-transparent overlay screen on top the PLAY screen
         # use screen.blit(Surface, pos) with enabled alpha. Requires pygame.Surface as arg
@@ -269,12 +279,22 @@ class GameState:
             fontsize=80,
         )
 
-        screen.draw.text(
-            "Press space to resume",
-            center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 100),
-            fontname="love_days",
-            fontsize=60,
-        )
+        if not self.is_resuming:
+            screen.draw.text(
+                "Press space to resume",
+                center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 100),
+                fontname="love_days",
+                fontsize=60,
+            )
+
+        if self.is_resuming:
+            screen.draw.text(
+                f"Resuming in {round(self.resume_countdown)}",
+                center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 100),
+                fontname="love_days",
+                fontsize=60,
+                color="orange",
+            )
 
     def draw_game_over(self, screen: object):
         """Draws the a GAMEOVER ui onto the screen.
@@ -345,6 +365,8 @@ class GameState:
 
         # clear game data, reset back to default
         self.game_saved = False
+        self.is_resuming = True  # game is not paused by default
+        self.resume_countdown = 0
         self.enemies = []
         self.score = 0
         self.new_highscore = False
