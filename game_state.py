@@ -355,6 +355,14 @@ class GameState:
         self.state = new_state
         self.state_timer = 0  # resets timer buffer for new screen
 
+    # TODO 8: refactor: move game resuming logic to GameState
+    ## it tells WHEN to check resume countdown, CONSEQUENCES of countdown
+    def resume(self, dt):
+        self.resume_countdown -= dt  # decreases resume_countdown
+        if self.resume_countdown <= 0:
+            self.is_resuming = False  # game no longer resuming
+            self.change_state("PLAY")
+
     def reset(self):
         """Cleans up game data and prepares for a fresh start"""
 

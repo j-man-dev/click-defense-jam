@@ -49,13 +49,9 @@ def update(dt):
     Args:
         dt (float): delta time is time since last frame. Given automatically by Pygame Zero
     """
-    # TODO 8: refactor: move game resuming logic to GameState
-    ## it tells WHEN to check resume countdown, CONSEQUENCES of countdown
+
     if game.state == "PAUSE" and game.is_resuming:  # game resuming?
-        game.resume_countdown -= dt  # decreases resume_countdown
-        if game.resume_countdown <= 0:
-            game.is_resuming = False  # game no longer resuming
-            game.change_state("PLAY")
+        game.resume(dt)
 
     # increment the state timer every frame. only resets during screen transition
     game.state_timer += dt
