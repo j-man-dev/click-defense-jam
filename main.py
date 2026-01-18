@@ -38,30 +38,6 @@ target = Target(
 player = Player(image_path="images/cat_angry.png")
 
 
-# TODO 7: refactor: Move collision logic to GameState class
-## Gamestate handles WHAT/CONSEQUENCES (what collides, consquences of collision)
-def update_collision(game: object, target, dt: float):
-    """Handles enemy updates + pixel perfect collision
-
-    Args:
-        game (object): A GameState instance used to store created enemies
-        target (object): A Target instance used to define what the objective is
-        dt (float): delta time is time since last frame. Given automatically by Pygame Zero
-
-    Returns:
-        bool: True if there is a collison and False if there isn't
-    """
-    for enemy in game.enemies:  # iterate through game.enemies Enemy obj list
-        enemy.update(target, dt)  # update enemy angle to face target center
-        # --- PIXEL-PERFECT COLLISIOIN DETECTION ---#
-        dx = int(enemy.mask_rect.left - target.mask_rect.left)  # left offset pos
-        dy = int(enemy.mask_rect.top - target.mask_rect.top)  # top offset pos
-        collision_point = target.mask.overlap(enemy.mask, (dx, dy))
-        if collision_point:  # opaque pixels touch?
-            return True
-    return False
-
-
 # TODO 9: refactor: clean up using GameState methods
 ## use spawn enemies, update enemies, and collision logic methods
 
@@ -73,7 +49,7 @@ def update(dt):
     Args:
         dt (float): delta time is time since last frame. Given automatically by Pygame Zero
     """
-    # TODO 8: move game resuming logic to GameState
+    # TODO 8: refactor: move game resuming logic to GameState
     ## it tells WHEN to check resume countdown, CONSEQUENCES of countdown
     if game.state == "PAUSE" and game.is_resuming:  # game resuming?
         game.resume_countdown -= dt  # decreases resume_countdown
@@ -86,15 +62,13 @@ def update(dt):
     # Enemy spawn when game state is "PLAY"
     if game.state == "PLAY":
         game.update_spawn(dt=dt, enemy_class=Enemy)  # spawns enemy
-        if update_collision(game, target, dt):  # is collision True?
-            game.change_state("GAMEOVER")  # state = GAMEOVER + reset state_timer
-            # ONLY saves game if GAMEOVER and game not saved yet
-            if game.state == "GAMEOVER" and not game.game_saved:  # default False
-                game.save_game()  # changes game_saved to true after saved
-                # Debug start: check if game was saved
-                # print(f"save status: {game.game_saved}")
-                # Debug end: check if game was saved
-                return  # exits out of update() loop
+        game.update_enemies(target=target, dt=dt)  # moves enemies
+        if game.update_enemy_target_collision(target, dt):  # is game over?
+            # Debug start: check if game was saved
+            print(f"save status: {game.game_saved}")
+            print(f"game over? {game.update_enemy_target_collision(target, dt)}")
+            # Debug end: check if game was saved
+            return  # exits out of update() loop
 
 
 def on_key_down(key):  # key stores key press input

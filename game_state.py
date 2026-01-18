@@ -475,3 +475,51 @@ class GameState:
             # New Enemy obj created and appended to enemies list
             self.enemies.append(enemy)
             self.spawn_timer = 0  # reset spawn timer after new enemy spawns
+
+    # TODO 7: refactor: Move collision and enemy update logic to GameState class
+    ## Gamestate handles WHAT/CONSEQUENCES (what collides, consquences of collision)
+
+    def update_enemies(self, target: object, dt: float):
+        """Moves enemy toward target, removes enemies when they are killed and adds to the score
+
+        Args:
+            target (object): A Target class instance used to define what the objective is
+            dt (float): delta time is time since last frame. Given automatically by Pygame Zero
+        """
+        self.target = target
+        for enemy in self.enemies[:]:  # [:] freezes dynamic list to modify safely
+            enemy.update(self.target, dt)  # "Move toward target!"
+            # debug: commented out to debug while placeholder not available. uncomment to exit debug
+            # if (
+            #     enemy.is_dead
+            # ):  # NOTE: PLACEHOLDER until enemy_player collision logic refactored
+            #     self.enemies.remove(enemy)
+            #     self.score += 1
+
+    def update_enemy_target_collision(self, target: object, dt: float):
+        """Returns True if game over triggered by a collision + saves game.
+
+        Args:
+            target (object): A Target class instance used to define what the objective is
+            dt (float): delta time is time since last frame. Given automatically by Pygame Zero
+
+        Returns:
+            bool: True if there is a collison and False if there isn't
+        """
+        self.target = target
+        for enemy in self.enemies:  # iterate through game.enemies Enemy obj list
+            # --- PIXEL-PERFECT COLLISIOIN DETECTION ---#
+            dx = int(
+                enemy.mask_rect.left - self.target.mask_rect.left
+            )  # left offset pos
+            dy = int(enemy.mask_rect.top - self.target.mask_rect.top)  # top offset pos
+            # checks if target and enemy mask collide/overlap -> returns True if it does
+            game_over = self.target.mask.overlap(enemy.mask, (dx, dy))
+
+            if game_over:  # enemy and target collide?
+                self.change_state("GAMEOVER")  # state = GAMEOVER + reset state_timer
+                # ONLY saves game if GAMEOVER and game not saved yet
+                if not self.game_saved:  # default False
+                    self.save_game()  # changes game_saved to true after saved
+                return True  # game is over
+        return False  # False all enemies in loop -> no collision
