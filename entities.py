@@ -20,7 +20,17 @@ ENEMY_ASSETS = {
     "yellow": {"image": "enemy_yellow", "path": "images/enemy_yellow.png"},
 }
 
+# TODO 2: create a global dictionary of all player images
+PLAYER_ASSETS = {
+    "angry": {"image": "cat_angry", "path": "images/cat_angry.png"},
+    "sad": {"image": "cat_sad", "path": "images/cat_sad.png"},
+    "happy": {"image": "cat_happy", "path": "images/cat_happy.png"},
+    "neutral": {"image": "cat_neutral", "path": "images/cat_neutral.png"},
+    "meow": {"image": "cat_meow", "path": "images/cat_meow.png"},
+}
 
+
+# NOTE: ENTITIES module focus on HOW to draw and move itself
 class Enemy(Actor):  # inherits Actor class to access its methods/prop
     """Docstring for Enemy
     Moves and rotates enemy to face target.
@@ -81,6 +91,7 @@ class Enemy(Actor):  # inherits Actor class to access its methods/prop
 
         pos_x, pos_y = positions[side]  # calls key value (x, y)
 
+        # set Actor pos - syntax: Actor.x, Actor.y
         if pos_x == "x":  # top or bottom edge
             self.x = random.randint(buffer, screen_width - buffer)
             self.y = pos_y
@@ -102,7 +113,7 @@ class Enemy(Actor):  # inherits Actor class to access its methods/prop
             self.mask_rect (obj): Rect obj of the mask obj after rotation and center aligns with enemy.pos center
         """
 
-        # Rotate angle to face target
+        # Rotate angle to face target - syntax: Actor.angle()
         self.angle = self.angle_to(target)  # ANTICLOCKWISE rotation
 
         # Create rotated surface & mask matching Actor's surf (CW to counter Actor's CCW)
@@ -148,23 +159,30 @@ class Target(Actor):
         self.mask_rect = self.mask.get_rect(center=(self.x, self.y))
 
 
+# TODO 1: Add ability to change the value of 'image_path' after obj created
+## create attributes to store'image_path' so it can be accessed/edited in code
+
+
 class Player:
     def __init__(self, image_path):
         """Creates a player sprite as the mouse cursor.
 
         Args:
+            image (str): the name of the image to create an Actor obj
             image_path(str): path of image.png MUST include file extension. (e.g. "images/myimage.png")
 
         """
-        self.image = pygame.image.load(image_path).convert_alpha()  # creates surface
-        # Create image Rect obj, the hitbox. Use to sync hitbox center to mouse pos
+        self.image_path = image_path
+
+        # -- Create Rect obj hitbox from image_path of image-- #
+        self.image_surf = pygame.image.load(self.image_path).convert_alpha()
         # Rect obj created once at __init__ instead of multiple times in draw() loop
-        self.rect = self.image.get_rect()
+        self.rect = self.image_surf.get_rect()
 
     def draw(self, screen):
         mouse_x, mouse_y = pygame.mouse.get_pos()  # retrieves mouse pos
-        # by default image top-left Rect hitbox stick to mouse.
-        # Syncs hitbox center to mouse pos using Rect .center property
+        # by default image top-left Rect hitbox stick to mouse, we want it to align center
+        # Sync hitbox center to mouse pos using Rect .center property
         self.rect.center = (mouse_x, mouse_y)
 
         # draw player image at mouse pos.

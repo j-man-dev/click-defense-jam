@@ -1,9 +1,6 @@
 import pgzrun
 from typing import TYPE_CHECKING, Any
 
-import pygame
-
-
 from game_state import GameState, SCREEN_HEIGHT, SCREEN_WIDTH
 from entities import Enemy, Player, Target
 
@@ -38,7 +35,7 @@ target = Target(
     screen_width=WIDTH,
     screen_height=HEIGHT,
 )
-player = Player(image_path="images/angry_cat.png")
+player = Player(image_path="images/cat_angry.png")
 
 
 def update_spawn(game: object, dt: float):
@@ -97,9 +94,7 @@ def update(dt):
     Args:
         dt (float): delta time is time since last frame. Given automatically by Pygame Zero
     """
-    # todo 5: If state is PAUSED and game is resuming, start decr resume_countdown
-    ## if resume countdown is <= 0 then change is_resuming back to False
-    ## change state to "PLAY"
+
     if game.state == "PAUSE" and game.is_resuming:  # game resuming?
         game.resume_countdown -= dt  # decreases resume_countdown
         if game.resume_countdown <= 0:
@@ -113,7 +108,6 @@ def update(dt):
         update_spawn(game, dt)  # spawns enemy
         if update_collision(game, target, dt):  # is collision True?
             game.change_state("GAMEOVER")  # state = GAMEOVER + reset state_timer
-            pygame.mouse.set_visible(True)  # show regular mouse arrow
             # ONLY saves game if GAMEOVER and game not saved yet
             if game.state == "GAMEOVER" and not game.game_saved:  # default False
                 game.save_game()  # changes game_saved to true after saved
@@ -121,13 +115,6 @@ def update(dt):
                 # print(f"save status: {game.game_saved}")
                 # Debug end: check if game was saved
                 return  # exits out of update() loop
-
-
-# TODO 6: Create event handler to PAUSE game when space pressed
-## use event handling hook on_key_down(key)
-## create bool flag that indicates whether or not screen is currently paused
-## if space pressed and  game state is PLAY, then change state PAUSE
-## if space pressed and game state is PAUSE, then is_resuming = True & countdown = 3.0
 
 
 def on_key_down(key):  # key stores key press input
@@ -147,9 +134,6 @@ def on_key_down(key):  # key stores key press input
             game.resume_countdown = 3.0
 
 
-# TODO 7: disable mouse and key inputs when PAUSE state
-## if state is PAUSED and input is registered,
-## exit out of event handling hook functions -> use return
 def on_mouse_down(pos, button):
     """Called automatically by Pygame zero
     Mouse clicks handlings the following event hooks:
@@ -204,12 +188,18 @@ def on_mouse_down(pos, button):
             # # DEBUG end: check difficulty scaling speed and spawn freq
 
 
+# TODO 4: call the update_mouse_visiblity() method in draw
+
+
 def draw():
     """draw() automatically by Pygame Zero when it needs to redraw your game window.
     It handles displaying the target, enemy movement, score,
     and game state (menu, playing, game over) on screen
     """
     screen.clear()  # erases old drawings when draw() is called
+
+    # sets mouse visibility to True/False base on game state
+    game.update_mouse_visibility()
 
     if game.state == "PAUSE":
         game.draw_play(screen)
@@ -222,12 +212,15 @@ def draw():
     # debug: comment code below to enter debug. uncomment to exit debug
     game.render_map[game.state](screen=screen)  # calls draw methods based on state
 
+    # TODO 5: add visibility of Player sprite in both PLAY and GAMEOVER state
+
     # display when playing
     if game.state == "PLAY":
         target.draw()  # draw Target obj
         # iterate for every item in game.enemies list, temp store in enemy var
         for enemy in game.enemies:
             enemy.draw()  # draw Enemy obj stored in actor attribute
+    if game.state == "PLAY" or game.state == "GAMEOVER":
         player.draw(screen=screen)
 
 

@@ -6,7 +6,7 @@ import pygame
 from entities import ENEMY_ASSETS
 from ui import Button
 
-
+# NOTE: game_state mddule focus on WHEN/WHERE/WHAT/HOW MANY to draw, consequences and performance
 # Global constants
 MAX_DIFFICULTY_SCORE = 240  # ((current_speed - start speed)//value_increased_by)*points required per interval
 START_SPEED = 80  # always start speed at this value
@@ -19,13 +19,6 @@ SCREEN_WIDTH = 1920
 SCREEN_HEIGHT = 1080
 
 
-# TODO 2: Create a bool flag that indicates whether or not screen is paused
-## is_resuming -> False means it is paused and true means it is resuming
-## True means screen is not paused
-
-
-# TODO 3: Create attribute that tracks resume countdown to change to PLAY screen
-## default should be set to 0. also add it to reset() method.
 class GameState:
     def __init__(self):
         """Holds all the game state screen data and variables together (menu, play, end).
@@ -69,9 +62,6 @@ class GameState:
         self.speed_min = START_SPEED  # px/sec
         self.speed_max = START_SPEED
         self.state_timer = 0
-
-        # TODO 1: Add game state for PAUSE
-        ## add as self.state comment and self.render_map
 
         # Current screen/mode (menu, playing, game_over)
         self.state = "MENU"  # "MENU", "PLAY", "GAMEOVER", "PAUSE"
@@ -163,6 +153,21 @@ class GameState:
 
         self.game_saved = True  # True when game is saved
 
+    # TODO 3: Create a method that toggles mouse pointer visiblity based on game state
+    ## MENU: mouse arrow visible
+    ## PAUSE, PLAY, GAMEOVER: mouse arrow invisible
+    ## hide default mouse arrow bc it will be replaced with player sprite
+
+    def update_mouse_visibility(self):
+        """Hides mouse arrow on all screens except MENU because all other screens
+        will display the Player sprite over the mouse arrow.
+
+        """
+        if self.state == "MENU":
+            pygame.mouse.set_visible(True)
+        else:  # state is any other screen
+            pygame.mouse.set_visible(False)
+
     def draw_menu(self, screen: object):
         """Draws the menu ui onto the screen.
         Background, buttons, ui elements.
@@ -215,8 +220,7 @@ class GameState:
         Args:
             screen (obj): Pygame Zero Screen object that represents game screen
         """
-        # hide default mouse arrow bc it will be replaced with player sprite
-        pygame.mouse.set_visible(False)
+
         # set window caption
         pygame.display.set_caption("Cake Defender")
 
@@ -232,17 +236,6 @@ class GameState:
             owidth=1,
             ocolor=(154, 207, 174),  # green
         )
-
-        # TODO 4: Create method to draw PAUSE semi-transparent screen
-        ## set caption -> game title - PAUSE
-        ## Create transparent overlay Surface to go over the PLAY screen:
-        ### use pygame.Surface with pygame.SRCALPHA to enable transparency capability on the surface
-        ## fill overlay Surface with tuple (R,G,B,A) -> A: aplha transparency is now enabled
-        ### use semi-transparent A -> 0-255 0 is full transparency
-        ## Draw the PLAY screen
-        ## use screen.blit() to draw the overlay Surface on top.
-        ## text: PAUSED press space to resume if is_paused = True
-        ## text: is_paused False, resume_countdown value rounded to int 0.5+ up, <0.5 down
 
     def draw_pause(self, screen: object):
         """Draws the a PAUSE ui onto the screen.
