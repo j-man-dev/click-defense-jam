@@ -1,5 +1,4 @@
 import math
-import random
 from pgzero.builtins import Actor
 # from pgzero.loaders import images, sounds  # Manually import the magic loaders
 
@@ -37,7 +36,13 @@ class Enemy(Actor):  # inherits Actor class to access its methods/prop
     Handles enemy spawn positions, movement toward target.
     """
 
-    def __init__(self, image, image_path, speed, screen_width, screen_height):
+    def __init__(
+        self,
+        image: str,
+        image_path: str,
+        pos: tuple[int, int],
+        speed: int,
+    ):
         """
         Docstring for __init__
 
@@ -63,47 +68,14 @@ class Enemy(Actor):  # inherits Actor class to access its methods/prop
         super().__init__(image)  # creates Actor obj
         self.image_path = image_path
         self.speed = speed  # px/sec
-        self.spawn_pos(
-            screen_width, screen_height
-        )  # sets spawn pos relative to screen dimensions
+        self.x = pos[0]
+        self.y = pos[1]
         self.image_surf = pygame.image.load(self.image_path)
         self.mask = None
         self.mask_rect = None
+        self.is_dead = False  # by default enemy is not dead
 
-    # TODO 14: refactor: Move spawn pos logic to GameState class
-    ## it tells WHERE to draw entities
-    def spawn_pos(self, screen_width, screen_height):
-        """Spawn from edges and corners off-screen."""
-        sprite_diag = math.hypot(self.width, self.height)  # diagonal length
-        buffer = int(sprite_diag * 0.5) + 50  # half diag + padding
-
-        positions = {
-            "left": (-buffer, "y"),
-            "right": (screen_width + buffer, "y"),
-            "top": ("x", -buffer),
-            "bottom": ("x", screen_height + buffer),
-            "top-left": (-buffer, -buffer),
-            "top-right": (screen_width + buffer, -buffer),
-            "bottom-left": (-buffer, screen_height + buffer),
-            "bottom-right": (screen_width + buffer, screen_height + buffer),
-        }
-
-        # Choose random key value from positions dict
-        side = random.choice(list(positions.keys()))
-
-        pos_x, pos_y = positions[side]  # calls key value (x, y)
-
-        # set Actor pos - syntax: Actor.x, Actor.y
-        if pos_x == "x":  # top or bottom edge
-            self.x = random.randint(buffer, screen_width - buffer)
-            self.y = pos_y
-        elif pos_y == "y":  # left or right edge
-            self.y = random.randint(buffer, screen_height - buffer)
-            self.x = pos_x
-        else:  # corners
-            self.x, self.y = pos_x, pos_y
-
-    def update(self, target, dt):
+    def movement(self, target, dt):
         """Moves and rotates its right side to the target's center.
         Stores rotated offset for mask alignment to Actor's draw.
 

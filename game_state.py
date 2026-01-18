@@ -1,4 +1,5 @@
 import json
+import math
 from pathlib import Path
 import random
 import sys
@@ -6,6 +7,7 @@ import pygame
 from entities import ENEMY_ASSETS
 from ui import Button
 from pgzero.loaders import sounds
+from pgzero.builtins import Actor
 
 # NOTE: game_state module focus on WHEN/WHERE/WHAT/HOW MANY to draw, consequences and performance
 # Global constants
@@ -171,12 +173,16 @@ class GameState:
         else:  # state is any other screen
             pygame.mouse.set_visible(False)
 
-    def draw_menu(self, screen: object):
+    def draw_menu(
+        self, screen: object, target: object | None = None, player: object | None = None
+    ):
         """Draws the menu ui onto the screen.
         Background, buttons, ui elements.
 
         Args:
             screen (obj): Pygame Zero Screen object that represents game screen
+            target (object): A Target class instance not needed for menu.
+            player (object): A Player class instance not needed for menu.
         """
 
         # set window caption
@@ -216,21 +222,31 @@ class GameState:
         for btn in self.menu_buttons.values():  # loop through key values: Button obj
             btn.draw(screen)  # calls Button draw() method
 
-    def draw_play(self, screen: object):
+    def draw_play(self, screen: object, target: object, player: object):
         """Draws the a gameplay ui onto the screen.
         Background and current score.
 
         Args:
             screen (obj): Pygame Zero Screen object that represents game screen
+            target (object): A Target class instance used to define what the objective is.
+            player (object): A Player class instance defines what the play is
         """
 
         # set window caption
         pygame.display.set_caption("Cake Defender")
 
-        # screen background
+        # 1. draw screen background
         screen.blit("play_screen", (0, 0))
 
-        # Display current score
+        # 2. draw target on PLAY screen
+        target.draw()  # draw Target obj
+
+        # 3. draw every spawned enemy
+        # iterate for every item in game.enemies list, temp store in enemy var
+        for enemy in self.enemies:
+            enemy.draw()  # draw Enemy obj stored in actor attribute
+
+        # 4. Display current score
         screen.draw.text(
             f"Score: {self.score}",
             (100, 0),
@@ -240,12 +256,24 @@ class GameState:
             ocolor=(154, 207, 174),  # green
         )
 
-    def draw_pause(self, screen: object):
+        # 5. draw player
+        if (
+            self.state != "PAUSE"
+        ):  # don't display in PAUSE state to reduce cheating of moving mouse/player to enemy during pause
+            player.draw(screen)
+
+    # TODO 12: refactor: Move WHAT/WHERE to draw code to GameState class
+    ## it tells WHAT entities to draw and WHERE which screens/state to draw them
+    ## move drawing entities in pause screen
+
+    def draw_pause(self, screen: object, target: object, player: object):
         """Draws the a PAUSE ui onto the screen.
         PAUSE text and instruction on how to resume.
 
         Args:
             screen (obj): Pygame Zero Screen object that represents game screen
+            target (object): A Target class instance used to define what the objective is.
+            player (object): A Player class instance used to define what a player is
         """
 
         # set window caption
@@ -253,13 +281,25 @@ class GameState:
 
         # -- screen background -- #
 
-        # Create overlay Surface = screen size. Use pygame.Surface with SRCALPHA to enable transparency
+        # 1. draw PLAY screen
+        self.draw_play(screen, target, player)
+
+        # 2. draw the target obj on top of PLAY screen
+        target.draw()
+
+        # 3. draw each spawned enemy
+        # iterate for every item in self.enemies list, temp store in enemy variable
+        for enemy in self.enemies:
+            enemy.draw()  # draw Enemy obj stored in actor attribute
+
+        ## --- Create a semi-transparent overlay screen to still see game PLAY --- ##
+        # 4. Create overlay Surface = screen size. Use pygame.Surface with SRCALPHA to enable transparency
         overlay = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
         # use Surface_obj.fill() to fill overlay Surface with semi-transparent black color
         ## (0, 0, 0, 128) -> R,G,B,A -> A (alpha) 0-255, 0 is full transparency
         overlay.fill((0, 0, 0, 128))
 
-        # draw the semi-transparent overlay screen on top the PLAY screen
+        # 5. draw the semi-transparent overlay screen on top the PLAY screen
         # use screen.blit(Surface, pos) with enabled alpha. Requires pygame.Surface as arg
         screen.blit(overlay, (0, 0))  # top-left pos 0, 0
 
@@ -290,12 +330,16 @@ class GameState:
                 color="orange",
             )
 
-    def draw_game_over(self, screen: object):
+    def draw_game_over(
+        self, screen: object, player: object, target: object | None = None
+    ):
         """Draws the a GAMEOVER ui onto the screen.
         Background, buttons, ui elements.
 
         Args:
             screen (obj): Pygame Zero Screen object that represents game screen
+            target (object): A Target class instance not needed for game over.
+            player (object): A Player class instance defines what the play is
         """
 
         # set window caption
@@ -345,6 +389,9 @@ class GameState:
         ) in self.game_over_buttons.values():  # loops through key values: Button objs
             btn.draw(screen)  # calls Button draw() method
 
+        # draw player on screen
+        player.draw(screen)
+
     ## --- # NOTE: GAME STATE MANAGEMENT LOGIC --- ##
 
     def change_state(self, new_state: str):
@@ -356,13 +403,23 @@ class GameState:
         self.state = new_state
         self.state_timer = 0  # resets timer buffer for new screen
 
-    # TODO 8: refactor: move game resuming logic to GameState
-    ## it tells WHEN to check resume countdown, CONSEQUENCES of countdown
-    def resume(self, dt):
-        self.resume_countdown -= dt  # decreases resume_countdown
-        if self.resume_countdown <= 0:
-            self.is_resuming = False  # game no longer resuming
-            self.change_state("PLAY")
+    # TODO 8: refactor: move game resuming and pausing logic to GameState
+    ## it tells WHEN to check pause and resume countdown, CONSEQUENCES of countdown
+
+    def check_pause(self, input_button, expected_button):
+        if input_button == expected_button:  # is space pressed?
+            if self.state == "PLAY":
+                self.change_state("PAUSE")  # DISPLAY PAUSE SCREEN and pause game
+            elif self.state == "PAUSE":
+                self.is_resuming = True
+                self.resume_countdown = 3.0
+
+    def check_resume(self, dt):
+        if self.state == "PAUSE" and self.is_resuming:  # game resuming?
+            self.resume_countdown -= dt  # decreases resume_countdown
+            if self.resume_countdown <= 0:
+                self.is_resuming = False  # game no longer resuming
+                self.change_state("PLAY")
 
     def reset(self):
         """Cleans up game data and prepares for a fresh start"""
@@ -486,6 +543,48 @@ class GameState:
     # TODO 6: refactor: move spawn logic function to GameState class
     ## GameState handles WHEN/WHERE/WHAT/HOW MANY to draw
 
+    # TODO 14: refactor: Move spawn pos logic to GameState class
+    ## it tells WHERE to draw entities
+    def get_spawn_position(self, screen_width, screen_height, enemy_color="black"):
+        """Returns (x, y) spawn position"""
+
+        # 1. get data from entities registry dictionary
+        data = ENEMY_ASSETS[enemy_color]
+
+        # 2. create temporary Actor obj to get dimensions. Actor(image_name)
+        ## Pygame zero loads image and sets .width .height
+        temp_actor = Actor(data["image"])
+
+        sprite_diag = math.hypot(temp_actor.width, temp_actor.height)  # diagonal length
+        buffer = int(sprite_diag * 0.5) + 50  # half diag + padding
+
+        positions = {
+            "left": (-buffer, "y"),
+            "right": (screen_width + buffer, "y"),
+            "top": ("x", -buffer),
+            "bottom": ("x", screen_height + buffer),
+            "top-left": (-buffer, -buffer),
+            "top-right": (screen_width + buffer, -buffer),
+            "bottom-left": (-buffer, screen_height + buffer),
+            "bottom-right": (screen_width + buffer, screen_height + buffer),
+        }
+
+        # Choose random key value from positions dict
+        side = random.choice(list(positions.keys()))
+
+        pos_x, pos_y = positions[side]  # calls key value (x, y)
+
+        # set Actor pos - syntax: Actor.x, Actor.y
+        if pos_x == "x":  # top or bottom edge
+            temp_actor.x = random.randint(buffer, screen_width - buffer)
+            temp_actor.y = pos_y
+        elif pos_y == "y":  # left or right edge
+            temp_actor.y = random.randint(buffer, screen_height - buffer)
+            temp_actor.x = pos_x
+        else:  # corners
+            temp_actor.x, temp_actor.y = pos_x, pos_y
+        return (temp_actor.x, temp_actor.y)  # returns x, y spawn position
+
     def update_spawn(self, dt: float, enemy_class: object):
         """Handles enemy spawning logic based on difficulty progression.
         New enemy spawn color changes based on stage level
@@ -502,14 +601,16 @@ class GameState:
 
         if self.spawn_timer > self.spawn_interval:
             new_speed = self.get_spawn_speed()
+            spawn_pos = self.get_spawn_position(
+                screen_height=SCREEN_HEIGHT, screen_width=SCREEN_WIDTH
+            )
 
             # Enemy object created
             enemy = enemy_class(
                 image=self.get_enemy_image()["image"],
                 image_path=self.get_enemy_image()["path"],
+                pos=spawn_pos,
                 speed=new_speed,
-                screen_width=SCREEN_WIDTH,
-                screen_height=SCREEN_HEIGHT,
             )
             # New Enemy obj created and appended to enemies list
             self.enemies.append(enemy)
@@ -532,21 +633,12 @@ class GameState:
         for enemy in self.enemies:
             if input_button == expected_button and player.rect.colliderect(
                 enemy.mask_rect
-            ):
-                # sounds.squish.play()  # plays squish sound when enemy clicked
-                # REVIEW: uncomment sound for now until a method to retrieve .wav sound files is created
+            ):  # player clicked on enemy?
+                # TODO 15 (not completed): Create a method in Enemy class that tells what the enemy sounds like
+                # then call it hear to tell when the sound should play
+                ## uncomment sound for now until a method to retrieve .wav sound files is created
                 # sounds.squish.play()  # plays a sound when enemy clicked
-                self.enemies.remove(enemy)
-                self.score += 1
-                # DEBUG start: check difficulty scaling speed and spawn freq
-                print(
-                    f"Score: {self.score} spawn interval: {self.spawn_interval} speed: {enemy.speed}"
-                )
-                # DEBUG end: check difficulty scaling speed and spawn freq
-
-                ### --- only call when score increases --- ###
-                self.update_difficulty()  # checks if difficulty needs to be updated
-                self.update_highscore()  # checks if highscore needs to be updated locally
+                enemy.is_dead = True
 
     # TODO 7: refactor: Move collision and enemy update logic to GameState class
     ## Gamestate handles WHAT/CONSEQUENCES (what collides, consquences of collision)
@@ -560,15 +652,20 @@ class GameState:
         """
         self.target = target
         for enemy in self.enemies[:]:  # [:] freezes dynamic list to modify safely
-            enemy.update(self.target, dt)  # "Move toward target!"
-            # debug: commented out to debug while placeholder not available. uncomment to exit debug
-            # if (
-            #     enemy.is_dead
-            # ):  # NOTE: PLACEHOLDER until enemy_player collision logic refactored
-            #     self.enemies.remove(enemy)
-            #     self.score += 1
+            enemy.movement(self.target, dt)  # "Move toward target!"
+            if enemy.is_dead:
+                self.enemies.remove(enemy)
+                self.score += 1
+                # DEBUG start: check difficulty scaling speed and spawn freq
+                print(
+                    f"Score: {self.score} spawn interval: {self.spawn_interval} speed: {enemy.speed}"
+                )
+                # DEBUG end: check difficulty scaling speed and spawn freq
+                ### --- only call when score increases --- ###
+                self.update_difficulty()  # checks if difficulty needs to be updated
+                self.update_highscore()  # checks if highscore needs to be updated locally
 
-    def update_enemy_target_collision(self, target: object, dt: float):
+    def check_enemy_target_collision(self, target: object, dt: float):
         """Returns True if game over triggered by a collision + saves game.
 
         Args:

@@ -38,10 +38,6 @@ target = Target(
 player = Player(image_path="images/cat_angry.png")
 
 
-# TODO 9: refactor: clean up using GameState methods
-## use spawn enemies, update enemies, and collision logic methods
-
-
 def update(dt):
     """update() loop called automatically by Pygame Zero 60x/sec.
     It handles game logic: spawn rate, movement, collisions, spawn speed.
@@ -50,8 +46,7 @@ def update(dt):
         dt (float): delta time is time since last frame. Given automatically by Pygame Zero
     """
 
-    if game.state == "PAUSE" and game.is_resuming:  # game resuming?
-        game.resume(dt)
+    game.check_resume(dt)  # is resuming? if True countdown til PLAY state
 
     # increment the state timer every frame. only resets during screen transition
     game.state_timer += dt
@@ -59,7 +54,7 @@ def update(dt):
     if game.state == "PLAY":
         game.update_spawn(dt=dt, enemy_class=Enemy)  # spawns enemy
         game.update_enemies(target=target, dt=dt)  # moves enemies
-        if game.update_enemy_target_collision(target, dt):  # is game over?
+        if game.check_enemy_target_collision(target, dt):  # is game over?
             return  # exits out of update() loop
 
 
@@ -71,17 +66,11 @@ def on_key_down(key):  # key stores key press input
     Args:
         key (enum): reads key press inputs
     """
+    if game.state == "PAUSE" and game.is_resuming:  # is game resuming?
+        return  # True then exits out of function to prevent pressing again during countdown
 
-    if key == key.SPACE:  # is space pressed?
-        if game.state == "PLAY":
-            game.change_state("PAUSE")  # DISPLAY PAUSE SCREEN and pause game
-        elif game.state == "PAUSE":
-            game.is_resuming = True
-            game.resume_countdown = 3.0
-
-
-# TODO 11: refactor: update event hook method using GameState method
-## replace collision logic
+    # check pause: True > state set to PAUSE, False -> game resume
+    game.check_pause(input_button=key, expected_button=key.SPACE)
 
 
 def on_mouse_down(pos, button):
@@ -109,9 +98,9 @@ def on_mouse_down(pos, button):
     game.check_button_interactions(
         mouse_pos=pos, input_button=button, expected_button=mouse.LEFT
     )
-    # DEBUG start: print what the state is after button is pressed
-    print(f"mouse click change state {game.state}. state timer: {game.state_timer}")
-    # DEBUG start: print what the state is after button is pressed
+    # # DEBUG start: print what the state is after button is pressed
+    # print(f"mouse click change state {game.state}. state timer: {game.state_timer}")
+    # # DEBUG start: print what the state is after button is pressed
 
     # removes enemies when clicked and scales diffculty base on score
     game.check_enemy_player_collisions(
@@ -121,11 +110,6 @@ def on_mouse_down(pos, button):
     )
 
 
-# TODO 12: refactor: Move WHAT/WHERE to draw code to GameState class
-## it tells WHAT entities to draw and WHERE which screens/state to draw them
-# TODO 13: refactor: Update draw() using GameState methods
-
-
 def draw():
     """draw() automatically by Pygame Zero when it needs to redraw your game window.
     It handles displaying the target, enemy movement, score,
@@ -133,32 +117,14 @@ def draw():
     """
     screen.clear()  # erases old drawings when draw() is called
 
-    # TODO 4: call the update_mouse_visiblity() method in draw
-
     # sets mouse visibility to True/False base on game state
     game.update_mouse_visibility()
 
-    if game.state == "PAUSE":
-        game.draw_play(screen)
-        target.draw()  # draw Target obj
-        # iterate for every item in game.enemies list, temp store in enemy var
-        for enemy in game.enemies:
-            enemy.draw()  # draw Enemy obj stored in actor attribute
-
     # Use current game.state value to decide what to draw. Default value set to "MENU"
     # debug: comment code below to enter debug. uncomment to exit debug
-    game.render_map[game.state](screen=screen)  # calls draw methods based on state
-
-    # TODO 5: add visibility of Player sprite in both PLAY and GAMEOVER state
-
-    # display when playing
-    if game.state == "PLAY":
-        target.draw()  # draw Target obj
-        # iterate for every item in game.enemies list, temp store in enemy var
-        for enemy in game.enemies:
-            enemy.draw()  # draw Enemy obj stored in actor attribute
-    if game.state == "PLAY" or game.state == "GAMEOVER":
-        player.draw(screen=screen)
+    game.render_map[game.state](
+        screen=screen, target=target, player=player
+    )  # calls draw_methods based on state
 
 
 # start pygame zero game loop using Python interpreter to run
