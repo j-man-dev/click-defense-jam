@@ -60,10 +60,6 @@ def update(dt):
         game.update_spawn(dt=dt, enemy_class=Enemy)  # spawns enemy
         game.update_enemies(target=target, dt=dt)  # moves enemies
         if game.update_enemy_target_collision(target, dt):  # is game over?
-            # Debug start: check if game was saved
-            print(f"save status: {game.game_saved}")
-            print(f"game over? {game.update_enemy_target_collision(target, dt)}")
-            # Debug end: check if game was saved
             return  # exits out of update() loop
 
 
@@ -91,9 +87,10 @@ def on_key_down(key):  # key stores key press input
 def on_mouse_down(pos, button):
     """Called automatically by Pygame zero
     Mouse clicks handlings the following event hooks:
-    Left click on enemies remove them.
-    Main menu button clicks starts or exits game.
-    Game over screen button clicks restarts or exits game.
+    Left click enemies remove them.
+    Start - Play screen.
+    Retry - Play screen
+    Quit - closes window
 
     Args:
         pos (tuple): (x, y) tuple that gives location of mouse pointer when button pressed.
@@ -107,40 +104,21 @@ def on_mouse_down(pos, button):
     # only allows mouse clicks if screen has been visible for at least 0.5s
     if game.state_timer < 0.5:
         return
-    # TODO 10: refactor: Move all button collision logic to GameState
-    ## it tells CONSEQUENCES of WHAT happens WHEN button is clicked
-    if button == mouse.LEFT:
-        # MENU screen actions
-        if game.state == "MENU":
-            # Start game when start clicked
-            if game.menu_buttons["START"].image_rect.collidepoint(pos):
-                game.change_state("PLAY")  # state = PLAY + reset state_timer
-            # Quit and exit game when quit clicked
-            elif game.menu_buttons["QUIT"].image_rect.collidepoint(pos):
-                game.quit()
-        # GAMEOVER screen actions
-        elif game.state == "GAMEOVER":
-            if game.game_over_buttons["RETRY"].image_rect.collidepoint(pos):
-                game.reset()
-            elif game.game_over_buttons["QUIT"].image_rect.collidepoint(pos):
-                game.quit()
+
+    # Finds which button was clicked on MENU/GAMEOVER screen then changes game state
+    game.check_button_interactions(
+        mouse_pos=pos, input_button=button, expected_button=mouse.LEFT
+    )
+    # DEBUG start: print what the state is after button is pressed
+    print(f"mouse click change state {game.state}. state timer: {game.state_timer}")
+    # DEBUG start: print what the state is after button is pressed
 
     # removes enemies when clicked and scales diffculty base on score
-    for enemy in game.enemies:
-        if button == mouse.LEFT and player.rect.colliderect(enemy.mask_rect):
-            sounds.squish.play()  # plays squish sound when enemy clicked
-            game.enemies.remove(enemy)
-            game.score += 1
-
-            ### --- only call when score increases --- ###
-            game.update_difficulty()  # checks if difficulty needs to be updated
-            game.update_highscore()  # checks if highscore needs to be updated locally
-
-            # DEBUG start: check difficulty scaling speed and spawn freq
-            print(
-                f"Score: {game.score} spawn interval: {game.spawn_interval} speed: {enemy.speed}"
-            )
-            # DEBUG end: check difficulty scaling speed and spawn freq
+    game.check_enemy_player_collisions(
+        input_button=button,
+        expected_button=mouse.LEFT,
+        player=player,
+    )
 
 
 # TODO 12: refactor: Move WHAT/WHERE to draw code to GameState class

@@ -5,6 +5,7 @@ import sys
 import pygame
 from entities import ENEMY_ASSETS
 from ui import Button
+from pgzero.loaders import sounds
 
 # NOTE: game_state module focus on WHEN/WHERE/WHAT/HOW MANY to draw, consequences and performance
 # Global constants
@@ -387,6 +388,36 @@ class GameState:
         pygame.quit()  # Uninitalizes all pygame modules
         sys.exit()  # terminates Python process and closes game window
 
+    # TODO 10: refactor: Move all button collision logic to GameState
+    ## it tells CONSEQUENCES of WHAT happens WHEN button is clicked. Changes game state
+    def check_button_interactions(self, mouse_pos, input_button, expected_button):
+        """Navigates player to differenct screens based on what buttons were clicked on MENU, GAMEOVER screen.
+        Start button -> Play screen
+        Quit button -> closes window
+        Retry button -> Play screen
+
+        Args:
+            mouse_pos (tuple [int, int]): the x, y position of where the mouse click occurred
+            input_button (enum): A mouse enum value indicating the button that was pressed.
+            expected_button (enum): A mouse enum value of the button you expect to be pressed
+        """
+        ## --- MENU screen actions --- ##
+        if input_button == expected_button:
+            if self.state == "MENU":
+                # Start game when start clicked
+                if self.menu_buttons["START"].image_rect.collidepoint(mouse_pos):
+                    self.change_state("PLAY")  # state = PLAY + reset state_timer
+                # Quit and exit game when quit clicked
+                elif self.menu_buttons["QUIT"].image_rect.collidepoint(mouse_pos):
+                    self.quit()
+
+            ## --- GAMEOVER screen actions --- ##
+            elif self.state == "GAMEOVER":
+                if self.game_over_buttons["RETRY"].image_rect.collidepoint(mouse_pos):
+                    self.reset()
+                elif self.game_over_buttons["QUIT"].image_rect.collidepoint(mouse_pos):
+                    self.quit()
+
     ## --- # NOTE: GAME LOGIC --- ##
 
     def get_difficulty_stage_progression(self):
@@ -483,6 +514,39 @@ class GameState:
             # New Enemy obj created and appended to enemies list
             self.enemies.append(enemy)
             self.spawn_timer = 0  # reset spawn timer after new enemy spawns
+
+    # TODO 10: refactor: Move all button collision logic to GameState
+    ## it tells CONSEQUENCES of WHAT happens WHEN button is clicked
+    # removes enemies when clicked and scales diffculty base on score
+    def check_enemy_player_collisions(
+        self, input_button, expected_button, player: object
+    ):
+        """Checks if enemy is killed, if so add a point to current score.
+
+        Args:
+            input_button (enum): A mouse enum value indicating the button that was pressed.
+            expected_button (enum): A mouse enum value of the button you expect to be pressed
+            player (object): An instance of Player class that contains the player's image
+        """
+
+        for enemy in self.enemies:
+            if input_button == expected_button and player.rect.colliderect(
+                enemy.mask_rect
+            ):
+                # sounds.squish.play()  # plays squish sound when enemy clicked
+                # REVIEW: uncomment sound for now until a method to retrieve .wav sound files is created
+                # sounds.squish.play()  # plays a sound when enemy clicked
+                self.enemies.remove(enemy)
+                self.score += 1
+                # DEBUG start: check difficulty scaling speed and spawn freq
+                print(
+                    f"Score: {self.score} spawn interval: {self.spawn_interval} speed: {enemy.speed}"
+                )
+                # DEBUG end: check difficulty scaling speed and spawn freq
+
+                ### --- only call when score increases --- ###
+                self.update_difficulty()  # checks if difficulty needs to be updated
+                self.update_highscore()  # checks if highscore needs to be updated locally
 
     # TODO 7: refactor: Move collision and enemy update logic to GameState class
     ## Gamestate handles WHAT/CONSEQUENCES (what collides, consquences of collision)
