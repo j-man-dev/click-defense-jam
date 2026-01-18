@@ -37,6 +37,9 @@ target = Target(
 )
 player = Player(image_path="images/cat_angry.png")
 
+# TODO 6: refactor: move spawn logic function to GameState class
+## GameState handles WHEN/WHERE/WHAT/HOW MANY to draw
+
 
 def update_spawn(game: object, dt: float):
     """Handles enemy spawning logic
@@ -65,6 +68,8 @@ def update_spawn(game: object, dt: float):
         game.spawn_timer = 0  # reset spawn timer after new enemy spawns
 
 
+# TODO 7: refactor: Move collision logic to GameState class
+## Gamestate handles WHAT/CONSEQUENCES (what collides, consquences of collision)
 def update_collision(game: object, target, dt: float):
     """Handles enemy updates + pixel perfect collision
 
@@ -87,6 +92,10 @@ def update_collision(game: object, target, dt: float):
     return False
 
 
+# TODO 9: refactor: clean up using GameState methods
+## use spawn enemies, update enemies, and collision logic methods
+
+
 def update(dt):
     """update() loop called automatically by Pygame Zero 60x/sec.
     It handles game logic: spawn rate, movement, collisions, spawn speed.
@@ -94,7 +103,8 @@ def update(dt):
     Args:
         dt (float): delta time is time since last frame. Given automatically by Pygame Zero
     """
-
+    # TODO 8: move game resuming logic to GameState
+    ## it tells WHEN to check resume countdown, CONSEQUENCES of countdown
     if game.state == "PAUSE" and game.is_resuming:  # game resuming?
         game.resume_countdown -= dt  # decreases resume_countdown
         if game.resume_countdown <= 0:
@@ -134,6 +144,10 @@ def on_key_down(key):  # key stores key press input
             game.resume_countdown = 3.0
 
 
+# TODO 11: refactor: update event hook method using GameState method
+## replace collision logic
+
+
 def on_mouse_down(pos, button):
     """Called automatically by Pygame zero
     Mouse clicks handlings the following event hooks:
@@ -153,7 +167,8 @@ def on_mouse_down(pos, button):
     # only allows mouse clicks if screen has been visible for at least 0.5s
     if game.state_timer < 0.5:
         return
-
+    # TODO 10: refactor: Move all button collision logic to GameState
+    ## it tells CONSEQUENCES of WHAT happens WHEN button is clicked
     if button == mouse.LEFT:
         # MENU screen actions
         if game.state == "MENU":
@@ -188,7 +203,9 @@ def on_mouse_down(pos, button):
             # # DEBUG end: check difficulty scaling speed and spawn freq
 
 
-# TODO 4: call the update_mouse_visiblity() method in draw
+# TODO 12: refactor: Move WHAT/WHERE to draw code to GameState class
+## it tells WHAT entities to draw and WHERE which screens/state to draw them
+# TODO 13: refactor: Update draw() using GameState methods
 
 
 def draw():
@@ -197,6 +214,8 @@ def draw():
     and game state (menu, playing, game over) on screen
     """
     screen.clear()  # erases old drawings when draw() is called
+
+    # TODO 4: call the update_mouse_visiblity() method in draw
 
     # sets mouse visibility to True/False base on game state
     game.update_mouse_visibility()

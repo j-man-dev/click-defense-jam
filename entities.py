@@ -30,7 +30,7 @@ PLAYER_ASSETS = {
 }
 
 
-# NOTE: ENTITIES module focus on HOW to draw and move itself
+# NOTE: ENTITIES module focus on WHAT it is and HOW to draw and move itself.
 class Enemy(Actor):  # inherits Actor class to access its methods/prop
     """Docstring for Enemy
     Moves and rotates enemy to face target.
@@ -70,6 +70,8 @@ class Enemy(Actor):  # inherits Actor class to access its methods/prop
         self.mask = None
         self.mask_rect = None
 
+    # TODO 14: refactor: Move spawn pos logic to GameState class
+    ## it tells WHERE to draw entities
     def spawn_pos(self, screen_width, screen_height):
         """Spawn from edges and corners off-screen."""
         sprite_diag = math.hypot(self.width, self.height)  # diagonal length
