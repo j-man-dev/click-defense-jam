@@ -37,36 +37,6 @@ target = Target(
 )
 player = Player(image_path="images/cat_angry.png")
 
-# TODO 6: refactor: move spawn logic function to GameState class
-## GameState handles WHEN/WHERE/WHAT/HOW MANY to draw
-
-
-def update_spawn(game: object, dt: float):
-    """Handles enemy spawning logic
-
-    Args:
-        game (object): A GameState instance used to store created enemies
-        dt (float): delta time is time since last frame. Given automatically by Pygame Zero
-
-    Returns:
-        list: returns list of enemy objects stored inside game.enemies list
-    """
-
-    game.spawn_timer += dt  # spawn timer increases every frame by dt value
-
-    if game.spawn_timer > game.spawn_interval:
-        new_speed = game.get_spawn_speed()
-
-        enemy = Enemy(
-            image=game.get_enemy_image()["image"],
-            image_path=game.get_enemy_image()["path"],
-            speed=new_speed,
-            screen_width=WIDTH,
-            screen_height=HEIGHT,
-        )
-        game.enemies.append(enemy)  # New Enemy obj created and appended to enemies list
-        game.spawn_timer = 0  # reset spawn timer after new enemy spawns
-
 
 # TODO 7: refactor: Move collision logic to GameState class
 ## Gamestate handles WHAT/CONSEQUENCES (what collides, consquences of collision)
@@ -115,7 +85,7 @@ def update(dt):
     game.state_timer += dt
     # Enemy spawn when game state is "PLAY"
     if game.state == "PLAY":
-        update_spawn(game, dt)  # spawns enemy
+        game.update_spawn(dt=dt, enemy_class=Enemy)  # spawns enemy
         if update_collision(game, target, dt):  # is collision True?
             game.change_state("GAMEOVER")  # state = GAMEOVER + reset state_timer
             # ONLY saves game if GAMEOVER and game not saved yet
@@ -196,11 +166,11 @@ def on_mouse_down(pos, button):
             game.update_difficulty()  # checks if difficulty needs to be updated
             game.update_highscore()  # checks if highscore needs to be updated locally
 
-            # # DEBUG start: check difficulty scaling speed and spawn freq
-            # print(
-            #     f"Score: {game.score} spawn interval: {game.spawn_interval} speed: {enemy.speed}"
-            # )
-            # # DEBUG end: check difficulty scaling speed and spawn freq
+            # DEBUG start: check difficulty scaling speed and spawn freq
+            print(
+                f"Score: {game.score} spawn interval: {game.spawn_interval} speed: {enemy.speed}"
+            )
+            # DEBUG end: check difficulty scaling speed and spawn freq
 
 
 # TODO 12: refactor: Move WHAT/WHERE to draw code to GameState class

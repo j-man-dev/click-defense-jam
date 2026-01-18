@@ -188,4 +188,4 @@ class Player:
         self.rect.center = (mouse_x, mouse_y)
 
         # draw player image at mouse pos.
-        screen.blit(self.image, self.rect)
+        screen.blit(self.image_surf, self.rect)

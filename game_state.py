@@ -6,7 +6,7 @@ import pygame
 from entities import ENEMY_ASSETS
 from ui import Button
 
-# NOTE: game_state mddule focus on WHEN/WHERE/WHAT/HOW MANY to draw, consequences and performance
+# NOTE: game_state module focus on WHEN/WHERE/WHAT/HOW MANY to draw, consequences and performance
 # Global constants
 MAX_DIFFICULTY_SCORE = 240  # ((current_speed - start speed)//value_increased_by)*points required per interval
 START_SPEED = 80  # always start speed at this value
@@ -115,6 +115,7 @@ class GameState:
         # loads existing data immediately
         self.load_save()
 
+    ## --- # NOTE: GAME PERSISTENCE LOGIC --- ##
     def load_save(self):
         """Reads the saved json data file if it exits, otherwise it keeps the default"""
         if self.save_path.exists():  # save_path exists?
@@ -130,6 +131,17 @@ class GameState:
         # print(f"Data successfully loaded: {self.data}")
         # DEBUG end: check data successfully loaded
 
+    def save_game(self):
+        """Call this ONLY when game over or player exits.
+        Optimize speed by reducing times accessing JSON"""
+
+        # opens file, then writes with utf-8 encoder, store value as variable game_data_file
+        with open(self.save_path, "w", encoding="utf-8") as game_data_file:
+            # saves the data to the opened file and indents 4 spaces for human readability
+            json.dump(self.data, game_data_file, indent=4)
+
+        self.game_saved = True  # True when game is saved
+
     def update_highscore(self):
         """Update the highscore value in memory only (locally), for easy access in code
         and to optimize speed by reducing read/write to JSON file.
@@ -142,17 +154,7 @@ class GameState:
             self.data["highscore"] = self.score  # to later save to JSON data file
             self.new_highscore = True  # new highscore is achieved
 
-    def save_game(self):
-        """Call this ONLY when game over or player exits.
-        Optimize speed by reducing times accessing JSON"""
-
-        # opens file, then writes with utf-8 encoder, store value as variable game_data_file
-        with open(self.save_path, "w", encoding="utf-8") as game_data_file:
-            # saves the data to the opened file and indents 4 spaces for human readability
-            json.dump(self.data, game_data_file, indent=4)
-
-        self.game_saved = True  # True when game is saved
-
+    ## --- # NOTE: RENDER COORDINATION DRAW LOGIC (WHEN/WHERE/WHAT/HOW MANY) --- ##
     # TODO 3: Create a method that toggles mouse pointer visiblity based on game state
     ## MENU: mouse arrow visible
     ## PAUSE, PLAY, GAMEOVER: mouse arrow invisible
@@ -342,6 +344,8 @@ class GameState:
         ) in self.game_over_buttons.values():  # loops through key values: Button objs
             btn.draw(screen)  # calls Button draw() method
 
+    ## --- # NOTE: GAME STATE MANAGEMENT LOGIC --- ##
+
     def change_state(self, new_state: str):
         """Central hub for all screen transitions
 
@@ -374,6 +378,8 @@ class GameState:
         """Quits and exits the game."""
         pygame.quit()  # Uninitalizes all pygame modules
         sys.exit()  # terminates Python process and closes game window
+
+    ## --- # NOTE: GAME LOGIC --- ##
 
     def get_difficulty_stage_progression(self):
         """Return a float representing stage progress (0.0 - 1.0) based on score milestones
@@ -436,3 +442,36 @@ class GameState:
             float: returns a random speed within speed_min and speed_max range
         """
         return random.uniform(self.speed_min, self.speed_max)
+
+    ## --- # NOTE: GAME FLOW LOGIC --- ##
+    # TODO 6: refactor: move spawn logic function to GameState class
+    ## GameState handles WHEN/WHERE/WHAT/HOW MANY to draw
+
+    def update_spawn(self, dt: float, enemy_class: object):
+        """Handles enemy spawning logic based on difficulty progression.
+        New enemy spawn color changes based on stage level
+
+        Args:
+            enemy_class(object): object created from Enemy class which defines what the enemy is
+            dt (float): delta time is time since last frame. Given automatically by Pygame Zero
+
+        Returns:
+            list: returns list of enemy objects stored inside game.enemies list
+        """
+
+        self.spawn_timer += dt  # spawn timer increases every frame by dt value
+
+        if self.spawn_timer > self.spawn_interval:
+            new_speed = self.get_spawn_speed()
+
+            # Enemy object created
+            enemy = enemy_class(
+                image=self.get_enemy_image()["image"],
+                image_path=self.get_enemy_image()["path"],
+                speed=new_speed,
+                screen_width=SCREEN_WIDTH,
+                screen_height=SCREEN_HEIGHT,
+            )
+            # New Enemy obj created and appended to enemies list
+            self.enemies.append(enemy)
+            self.spawn_timer = 0  # reset spawn timer after new enemy spawns
