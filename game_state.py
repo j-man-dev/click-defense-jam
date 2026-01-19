@@ -643,7 +643,7 @@ class GameState:
             if input_button == expected_button and player.rect.colliderect(
                 enemy.mask_rect
             ):  # player clicked on enemy?
-                # TODO 1 (not completed): Create a method in Enemy class that tells what the enemy sounds like
+                # TODO (sound feature): Create a method in Enemy class that tells what the enemy sounds like
                 # then call it hear to tell when the sound should play
                 ## uncomment sound for now until a method to retrieve .wav sound files is created
                 # sounds.squish.play()  # plays a sound when enemy clicked
@@ -694,3 +694,11 @@ class GameState:
                     self.save_game()  # changes game_saved to true after saved
                 return True  # game is over
         return False  # False all enemies in loop -> no collision
+
+    ## --- # NOTE: SOUND SYSTEM / AUDIO --- ##
+
+
+# TODO (sound feature): Create a method that plays sound
+## input sound file name without extension as a parameter
+## from pgzero.loaders import sounds to access sounds object
+## get attribute of the sound file sounds object
