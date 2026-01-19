@@ -55,11 +55,13 @@ ENEMY_ASSETS = {
 # TODO 2: create a global dictionary of all player images
 PLAYER_ASSETS = {
     "cat": {
-        "angry": {"image": "cat_angry", "path": "images/cat_angry.png"},
-        "sad": {"image": "cat_sad", "path": "images/cat_sad.png"},
-        "happy": {"image": "cat_happy", "path": "images/cat_happy.png"},
-        "neutral": {"image": "cat_neutral", "path": "images/cat_neutral.png"},
-        "meow": {"image": "cat_meow", "path": "images/cat_meow.png"},
+        "expressions": {
+            "angry": {"image": "cat_angry", "path": "images/cat_angry.png"},
+            "sad": {"image": "cat_sad", "path": "images/cat_sad.png"},
+            "happy": {"image": "cat_happy", "path": "images/cat_happy.png"},
+            "neutral": {"image": "cat_neutral", "path": "images/cat_neutral.png"},
+            "meow": {"image": "cat_meow", "path": "images/cat_meow.png"},
+        }
     }
 }
 
