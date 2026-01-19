@@ -52,7 +52,6 @@ ENEMY_ASSETS = {
 }
 
 
-# TODO 2: create a global dictionary of all player images
 PLAYER_ASSETS = {
     "cat": {
         "expressions": {
@@ -168,10 +167,6 @@ class Target(Actor):
         self.image_surf = pygame.image.load(self.image_path)
         self.mask = mask.from_surface(self.image_surf)
         self.mask_rect = self.mask.get_rect(center=(self.x, self.y))
-
-
-# TODO 1: Add ability to change the value of 'image_path' after obj created
-## create attributes to store'image_path' so it can be accessed/edited in code
 
 
 class Player:

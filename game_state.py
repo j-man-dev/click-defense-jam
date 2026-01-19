@@ -155,10 +155,6 @@ class GameState:
             self.new_highscore = True  # new highscore is achieved
 
     ## --- # NOTE: RENDER COORDINATION DRAW LOGIC (WHEN/WHERE/WHAT/HOW MANY) --- ##
-    # TODO 3: Create a method that toggles mouse pointer visiblity based on game state
-    ## MENU: mouse arrow visible
-    ## PAUSE, PLAY, GAMEOVER: mouse arrow invisible
-    ## hide default mouse arrow bc it will be replaced with player sprite
 
     def update_mouse_visibility(self):
         """Hides mouse arrow on all screens except MENU because all other screens
@@ -258,10 +254,6 @@ class GameState:
             self.state != "PAUSE"
         ):  # don't display in PAUSE state to reduce cheating of moving mouse/player to enemy during pause
             player.draw(screen)
-
-    # TODO 12: refactor: Move WHAT/WHERE to draw code to GameState class
-    ## it tells WHAT entities to draw and WHERE which screens/state to draw them
-    ## move drawing entities in pause screen
 
     def draw_pause(self, screen: object, target: object, player: object):
         """Draws the a PAUSE ui onto the screen.
@@ -400,9 +392,6 @@ class GameState:
         self.state = new_state
         self.state_timer = 0  # resets timer buffer for new screen
 
-    # TODO 8: refactor: move game resuming and pausing logic to GameState
-    ## it tells WHEN to check pause and resume countdown, CONSEQUENCES of countdown
-
     def check_pause(self, input_button, expected_button):
         if input_button == expected_button:  # is space pressed?
             if self.state == "PLAY":
@@ -442,8 +431,6 @@ class GameState:
         pygame.quit()  # Uninitalizes all pygame modules
         sys.exit()  # terminates Python process and closes game window
 
-    # TODO 10: refactor: Move all button collision logic to GameState
-    ## it tells CONSEQUENCES of WHAT happens WHEN button is clicked. Changes game state
     def check_button_interactions(self, mouse_pos, input_button, expected_button):
         """Navigates player to differenct screens based on what buttons were clicked on MENU, GAMEOVER screen.
         Start button -> Play screen
@@ -547,11 +534,7 @@ class GameState:
         return random.uniform(self.speed_min, self.speed_max)
 
     ## --- # NOTE: GAME FLOW LOGIC --- ##
-    # TODO 6: refactor: move spawn logic function to GameState class
-    ## GameState handles WHEN/WHERE/WHAT/HOW MANY to draw
 
-    # TODO 14: refactor: Move spawn pos logic to GameState class
-    ## it tells WHERE to draw entities
     def get_spawn_position(
         self,
         enemy_name: dict,
@@ -645,9 +628,6 @@ class GameState:
             self.enemies.append(enemy)
             self.spawn_timer = 0  # reset spawn timer after new enemy spawns
 
-    # TODO 10: refactor: Move all button collision logic to GameState
-    ## it tells CONSEQUENCES of WHAT happens WHEN button is clicked
-    # removes enemies when clicked and scales diffculty base on score
     def check_enemy_player_collisions(
         self, input_button, expected_button, player: object
     ):
@@ -663,14 +643,11 @@ class GameState:
             if input_button == expected_button and player.rect.colliderect(
                 enemy.mask_rect
             ):  # player clicked on enemy?
-                # TODO 15 (not completed): Create a method in Enemy class that tells what the enemy sounds like
+                # TODO 1 (not completed): Create a method in Enemy class that tells what the enemy sounds like
                 # then call it hear to tell when the sound should play
                 ## uncomment sound for now until a method to retrieve .wav sound files is created
                 # sounds.squish.play()  # plays a sound when enemy clicked
                 enemy.is_dead = True
-
-    # TODO 7: refactor: Move collision and enemy update logic to GameState class
-    ## Gamestate handles WHAT/CONSEQUENCES (what collides, consquences of collision)
 
     def update_enemies(self, target: object, dt: float):
         """Moves enemy toward target, removes enemies when they are killed and adds to the score
