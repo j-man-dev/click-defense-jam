@@ -52,7 +52,9 @@ def update(dt):
     game.state_timer += dt
     # Enemy spawn when game state is "PLAY"
     if game.state == "PLAY":
-        game.update_spawn(dt=dt, enemy_class=Enemy)  # spawns enemy
+        game.update_spawn(
+            dt=dt, enemy_class=Enemy, enemy_name="ant", enemy_asset="color"
+        )  # spawns enemy
         game.update_enemies(target=target, dt=dt)  # moves enemies
         if game.check_enemy_target_collision(target, dt):  # is game over?
             return  # exits out of update() loop
@@ -98,9 +100,6 @@ def on_mouse_down(pos, button):
     game.check_button_interactions(
         mouse_pos=pos, input_button=button, expected_button=mouse.LEFT
     )
-    # # DEBUG start: print what the state is after button is pressed
-    # print(f"mouse click change state {game.state}. state timer: {game.state_timer}")
-    # # DEBUG start: print what the state is after button is pressed
 
     # removes enemies when clicked and scales diffculty base on score
     game.check_enemy_player_collisions(
@@ -121,10 +120,8 @@ def draw():
     game.update_mouse_visibility()
 
     # Use current game.state value to decide what to draw. Default value set to "MENU"
-    # debug: comment code below to enter debug. uncomment to exit debug
-    game.render_map[game.state](
-        screen=screen, target=target, player=player
-    )  # calls draw_methods based on state
+    # calls each GameState draw methods based on current state
+    game.render_map[game.state](screen=screen, target=target, player=player)
 
 
 # start pygame zero game loop using Python interpreter to run

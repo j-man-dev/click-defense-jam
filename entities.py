@@ -6,26 +6,61 @@ from pygame import mask, transform
 import pygame
 
 # Global constants
-# nested dictionary containing enemy images in different colors
+# Registry data dictionary containing entity assets
+
 ENEMY_ASSETS = {
-    "black": {"image": "enemy_black", "path": "images/enemy_black.png"},
-    "blue": {"image": "enemy_blue", "path": "images/enemy_blue.png"},
-    "green": {"image": "enemy_green", "path": "images/enemy_green.png"},
-    "orange": {"image": "enemy_orange", "path": "images/enemy_orange.png"},
-    "pink": {"image": "enemy_pink", "path": "images/enemy_pink.png"},
-    "purple": {"image": "enemy_purple", "path": "images/enemy_purple.png"},
-    "red": {"image": "enemy_red", "path": "images/enemy_red.png"},
-    "teal": {"image": "enemy_teal", "path": "images/enemy_teal.png"},
-    "yellow": {"image": "enemy_yellow", "path": "images/enemy_yellow.png"},
+    "ant": {
+        "color": {
+            "black": {
+                "image": "enemy_black",
+                "path": "images/enemy_black.png",
+            },  # stage 1
+            "blue": {
+                "image": "enemy_blue",
+                "path": "images/enemy_blue.png",
+            },  # stage 2......
+            "green": {
+                "image": "enemy_green",
+                "path": "images/enemy_green.png",
+            },  # stage 3
+            "orange": {
+                "image": "enemy_orange",
+                "path": "images/enemy_orange.png",
+            },  # stage 4
+            "pink": {
+                "image": "enemy_pink",
+                "path": "images/enemy_pink.png",
+            },  # stage 5......
+            "purple": {
+                "image": "enemy_purple",
+                "path": "images/enemy_purple.png",
+            },  # stage 6
+            "red": {
+                "image": "enemy_red",
+                "path": "images/enemy_red.png",
+            },  # stage 7.....
+            "teal": {
+                "image": "enemy_teal",
+                "path": "images/enemy_teal.png",
+            },  # stage 8.......
+            "yellow": {
+                "image": "enemy_yellow",
+                "path": "images/enemy_yellow.png",
+            },  # stage 9
+        }
+    }
 }
+
 
 # TODO 2: create a global dictionary of all player images
 PLAYER_ASSETS = {
-    "angry": {"image": "cat_angry", "path": "images/cat_angry.png"},
-    "sad": {"image": "cat_sad", "path": "images/cat_sad.png"},
-    "happy": {"image": "cat_happy", "path": "images/cat_happy.png"},
-    "neutral": {"image": "cat_neutral", "path": "images/cat_neutral.png"},
-    "meow": {"image": "cat_meow", "path": "images/cat_meow.png"},
+    "cat": {
+        "angry": {"image": "cat_angry", "path": "images/cat_angry.png"},
+        "sad": {"image": "cat_sad", "path": "images/cat_sad.png"},
+        "happy": {"image": "cat_happy", "path": "images/cat_happy.png"},
+        "neutral": {"image": "cat_neutral", "path": "images/cat_neutral.png"},
+        "meow": {"image": "cat_meow", "path": "images/cat_meow.png"},
+    }
 }
 
 

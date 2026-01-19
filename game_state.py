@@ -9,7 +9,7 @@ from ui import Button
 from pgzero.loaders import sounds
 from pgzero.builtins import Actor
 
-# NOTE: game_state module focus on WHEN/WHERE/WHAT/HOW MANY to draw, consequences and performance
+# NOTE: GAME STATE module focus on WHEN/WHERE/WHAT/HOW MANY to draw, consequences and performance
 # Global constants
 MAX_DIFFICULTY_SCORE = 240  # ((current_speed - start speed)//value_increased_by)*points required per interval
 START_SPEED = 80  # always start speed at this value
@@ -56,7 +56,8 @@ class GameState:
         self.is_resuming = True  # game is not paused by default
         self.resume_countdown = 0  # tracks countdown sec til going back to play state
         self.enemies = []
-        self.enemy_colors = list(ENEMY_ASSETS.keys())  # retrieves the enemy color names
+        # self.enemy_colors = list(ENEMY_ASSETS.keys())  # retrieves the enemy color names
+        self.enemy_ant_colors = list(ENEMY_ASSETS["ant"]["color"].keys())
         self.score = 0
         self.highscore = 0
         self.new_highscore = False  # new highscore was achieved?
@@ -129,10 +130,6 @@ class GameState:
 
         # sets self.highscore with whatever value is stored in local central data dict.
         self.highscore = self.data["highscore"]
-
-        # DEBUG start: check data successfully loaded
-        # print(f"Data successfully loaded: {self.data}")
-        # DEBUG end: check data successfully loaded
 
     def save_game(self):
         """Call this ONLY when game over or player exits.
@@ -488,11 +485,19 @@ class GameState:
         # which gives a value b/w 0.0 (0%) and 1.0 (100%) so cap at 1.0
         return min(self.score / MAX_DIFFICULTY_SCORE, 1.0)  # selects lowest b/w the two
 
-    def get_enemy_image(self):
-        """Determines enemy image name based on score and stage difficulty"""
+    def get_enemy_image(self, enemy_name: dict, enemy_asset: dict):
+        """Determines enemy image name based on score and stage difficulty
+
+        Args:
+            enemy_name (dict): The enemy name (key) from ENEMY_ASSETS registry dictionary (e.g. "ant")
+            enemy_asset: (dict):  The enemy asset (key) from ENEMY_ASSETS registry dictionary (e.g. "color")
+        Returns:
+            dict: dictionary of enemy assets: image and image path
+        """
+
         progression = self.get_difficulty_stage_progression()
 
-        # stores the index number 0-8
+        # stores the index number 0-8 STAGE_COUNT -1 bc index range starts at 0
         stage_color_index = int(progression * (STAGE_COUNT - 1))
 
         # LOGICS
@@ -500,11 +505,13 @@ class GameState:
         # if index is 9 or greater: return a random color from the list
 
         if stage_color_index >= 9:
-            color_key = random.choice(self.enemy_colors)
+            color_key = random.choice(self.enemy_ant_colors)
         else:
-            color_key = self.enemy_colors[stage_color_index]
+            color_key = self.enemy_ant_colors[stage_color_index]
 
-        return ENEMY_ASSETS[color_key]  # returns dict of enemy image based on color
+        # returns dict of enemy image based on color
+        ## ENEMY_ASSETS["ants"]["color"][color_key]
+        return ENEMY_ASSETS[enemy_name][enemy_asset][color_key]
 
     def update_difficulty(self):
         """Difficulty-scaling: Increase spawn freq and speed based score progression.
@@ -545,15 +552,31 @@ class GameState:
 
     # TODO 14: refactor: Move spawn pos logic to GameState class
     ## it tells WHERE to draw entities
-    def get_spawn_position(self, screen_width, screen_height, enemy_color="black"):
-        """Returns (x, y) spawn position"""
+    def get_spawn_position(
+        self,
+        enemy_name: dict,
+        enemy_asset: dict,
+        screen_width=SCREEN_WIDTH,
+        screen_height=SCREEN_HEIGHT,
+    ):
+        """Returns (x, y) spawn position
+
+        Args:
+            screen_width (int): horizontal size of the screen in px
+            screen_height (int): vertical size of the screen in px
+            enemy_name (dict): The enemy name (key) from ENEMY_ASSETS registry dictionary (e.g. "ant")
+            enemy_asset (dict):  The enemy asset key from ENEMY_ASSETS registry dictionary (e.g. "color")
+        Returns:
+            tuple[int, int]: (x, y) spawn position
+        """
 
         # 1. get data from entities registry dictionary
-        data = ENEMY_ASSETS[enemy_color]
+        # ENEMY_ASSETS["ant"]["color"]["black"] -> image and path keys
+        image = self.get_enemy_image(enemy_name, enemy_asset)["image"]
 
         # 2. create temporary Actor obj to get dimensions. Actor(image_name)
         ## Pygame zero loads image and sets .width .height
-        temp_actor = Actor(data["image"])
+        temp_actor = Actor(image)
 
         sprite_diag = math.hypot(temp_actor.width, temp_actor.height)  # diagonal length
         buffer = int(sprite_diag * 0.5) + 50  # half diag + padding
@@ -585,14 +608,22 @@ class GameState:
             temp_actor.x, temp_actor.y = pos_x, pos_y
         return (temp_actor.x, temp_actor.y)  # returns x, y spawn position
 
-    def update_spawn(self, dt: float, enemy_class: object):
+    def update_spawn(
+        self,
+        dt: float,
+        enemy_class: object,
+        enemy_name: dict,
+        enemy_asset: dict,
+    ):
         """Handles enemy spawning logic based on difficulty progression.
         New enemy spawn color changes based on stage level
 
         Args:
             enemy_class(object): object created from Enemy class which defines what the enemy is
             dt (float): delta time is time since last frame. Given automatically by Pygame Zero
-
+            enemy_name (dict): The enemy name (key) from ENEMY_ASSETS registry dictionary (e.g. "ant")
+            enemy_asset (dict):  The enemy asset key from ENEMY_ASSETS registry dictionary (e.g. "color")
+            enemy_asset_value (dict): The enemy asset value from ENEMY_ASSETS registry dictionary (e.g. "black")
         Returns:
             list: returns list of enemy objects stored inside game.enemies list
         """
@@ -601,14 +632,12 @@ class GameState:
 
         if self.spawn_timer > self.spawn_interval:
             new_speed = self.get_spawn_speed()
-            spawn_pos = self.get_spawn_position(
-                screen_height=SCREEN_HEIGHT, screen_width=SCREEN_WIDTH
-            )
+            spawn_pos = self.get_spawn_position(enemy_name, enemy_asset)
 
             # Enemy object created
             enemy = enemy_class(
-                image=self.get_enemy_image()["image"],
-                image_path=self.get_enemy_image()["path"],
+                image=self.get_enemy_image(enemy_name, enemy_asset)["image"],
+                image_path=self.get_enemy_image(enemy_name, enemy_asset)["path"],
                 pos=spawn_pos,
                 speed=new_speed,
             )
@@ -656,11 +685,7 @@ class GameState:
             if enemy.is_dead:
                 self.enemies.remove(enemy)
                 self.score += 1
-                # DEBUG start: check difficulty scaling speed and spawn freq
-                print(
-                    f"Score: {self.score} spawn interval: {self.spawn_interval} speed: {enemy.speed}"
-                )
-                # DEBUG end: check difficulty scaling speed and spawn freq
+
                 ### --- only call when score increases --- ###
                 self.update_difficulty()  # checks if difficulty needs to be updated
                 self.update_highscore()  # checks if highscore needs to be updated locally
